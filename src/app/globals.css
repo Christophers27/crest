@@ -1,0 +1,90 @@
+@import "tailwindcss";
+
+/* ─── Color System (60-30-10 rule) ─────────────────────────────────────────
+   60% — off-black / off-white surfaces
+   30% — light yellow accent (#f6d67e, #f1c258)
+   10% — darker orange accent (#f0a468)
+──────────────────────────────────────────────────────────────────────────── */
+
+:root {
+  /* Surface colors (60%) */
+  --bg-primary: #f5f5f3;
+  --bg-secondary: #eaeae8;
+  --bg-elevated: #ffffff;
+  --fg-primary: #1a1a19;
+  --fg-secondary: #6b6b68;
+  --fg-muted: #9c9c98;
+
+  /* Border */
+  --border: #d8d8d4;
+  --border-subtle: #e8e8e5;
+
+  /* Accent colors (30% + 10%) */
+  --accent-light: #f6d67e;
+  --accent-mid: #f1c258;
+  --accent-strong: #f0a468;
+
+  /* Grid */
+  --grid-line: rgba(0, 0, 0, 0.06);
+  --grid-line-highlight: rgba(0, 0, 0, 0.18);
+}
+
+.dark {
+  --bg-primary: #0e0e0d;
+  --bg-secondary: #161615;
+  --bg-elevated: #1c1c1a;
+  --fg-primary: #e8e8e5;
+  --fg-secondary: #9c9c98;
+  --fg-muted: #6b6b68;
+
+  --border: #2a2a28;
+  --border-subtle: #222220;
+
+  --grid-line: rgba(255, 255, 255, 0.04);
+  --grid-line-highlight: rgba(255, 255, 255, 0.14);
+}
+
+@theme inline {
+  --color-bg-primary: var(--bg-primary);
+  --color-bg-secondary: var(--bg-secondary);
+  --color-bg-elevated: var(--bg-elevated);
+  --color-fg-primary: var(--fg-primary);
+  --color-fg-secondary: var(--fg-secondary);
+  --color-fg-muted: var(--fg-muted);
+  --color-border: var(--border);
+  --color-border-subtle: var(--border-subtle);
+  --color-accent-light: var(--accent-light);
+  --color-accent-mid: var(--accent-mid);
+  --color-accent-strong: var(--accent-strong);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+* {
+  border-color: var(--border);
+}
+
+body {
+  background: var(--bg-primary);
+  color: var(--fg-primary);
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+}
+
+/* ─── Scrollbar ────────────────────────────────────────────────────────── */
+
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--fg-muted);
+}
