@@ -55,10 +55,11 @@ export default function SignUpPage() {
   return (
     <div className="space-y-6">
       <div className="text-center">
-        <h1 className="font-mono text-xl font-semibold tracking-tight text-fg-primary">
+        <h1 className="font-mono text-xl font-semibold tracking-tight text-accent-mid">
           crest
         </h1>
-        <p className="mt-2 text-xs text-fg-muted">
+        <div className="mx-auto mt-2 h-px w-12 bg-linear-to-r from-transparent via-accent-light to-transparent" />
+        <p className="mt-3 text-xs text-fg-muted">
           Create your account to get started
         </p>
       </div>
@@ -83,7 +84,7 @@ export default function SignUpPage() {
             value={name}
             onChange={(e) => setName(e.target.value)}
             required
-            className="mt-1.5 block w-full rounded-md border border-border bg-bg-primary px-3 py-2 font-mono text-sm text-fg-primary placeholder-fg-muted transition-colors focus:border-accent-mid focus:outline-none focus:ring-1 focus:ring-accent-mid"
+            className="mt-1.5 block w-full rounded-md border border-border bg-bg-primary px-3 py-2 font-mono text-sm text-fg-primary placeholder-fg-muted transition-colors focus:border-accent-mid focus:outline-none focus:ring-1 focus:ring-accent-mid/50"
             placeholder="Your name"
           />
         </div>
@@ -101,7 +102,7 @@ export default function SignUpPage() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
-            className="mt-1.5 block w-full rounded-md border border-border bg-bg-primary px-3 py-2 font-mono text-sm text-fg-primary placeholder-fg-muted transition-colors focus:border-accent-mid focus:outline-none focus:ring-1 focus:ring-accent-mid"
+            className="mt-1.5 block w-full rounded-md border border-border bg-bg-primary px-3 py-2 font-mono text-sm text-fg-primary placeholder-fg-muted transition-colors focus:border-accent-mid focus:outline-none focus:ring-1 focus:ring-accent-mid/50"
             placeholder="you@example.com"
           />
         </div>
@@ -120,7 +121,7 @@ export default function SignUpPage() {
             onChange={(e) => setPassword(e.target.value)}
             required
             minLength={8}
-            className="mt-1.5 block w-full rounded-md border border-border bg-bg-primary px-3 py-2 font-mono text-sm text-fg-primary placeholder-fg-muted transition-colors focus:border-accent-mid focus:outline-none focus:ring-1 focus:ring-accent-mid"
+            className="mt-1.5 block w-full rounded-md border border-border bg-bg-primary px-3 py-2 font-mono text-sm text-fg-primary placeholder-fg-muted transition-colors focus:border-accent-mid focus:outline-none focus:ring-1 focus:ring-accent-mid/50"
             placeholder="At least 8 characters"
           />
         </div>
@@ -128,17 +129,23 @@ export default function SignUpPage() {
         <button
           type="submit"
           disabled={loading}
-          className="w-full rounded-md bg-accent-mid px-4 py-2 text-sm font-medium text-bg-primary transition-colors hover:bg-accent-strong focus:outline-none focus:ring-2 focus:ring-accent-mid focus:ring-offset-2 focus:ring-offset-bg-elevated disabled:opacity-50"
+          className="w-full rounded-md bg-accent-mid px-4 py-2 text-sm font-medium text-bg-primary transition-all hover:bg-accent-strong hover:shadow-[0_0_20px_-4px] hover:shadow-accent-mid/40 focus:outline-none focus:ring-2 focus:ring-accent-mid focus:ring-offset-2 focus:ring-offset-bg-elevated disabled:opacity-50"
         >
           {loading ? "Creating account..." : "Create account"}
         </button>
       </form>
 
+      <div className="flex items-center gap-3">
+        <div className="h-px flex-1 bg-border" />
+        <span className="text-[10px] text-fg-muted">or</span>
+        <div className="h-px flex-1 bg-border" />
+      </div>
+
       <p className="text-center text-xs text-fg-muted">
         Already have an account?{" "}
         <Link
           href="/sign-in"
-          className="text-accent-mid transition-colors hover:text-accent-strong"
+          className="font-medium text-accent-light transition-colors hover:text-accent-mid"
         >
           Sign in
         </Link>

@@ -32,7 +32,6 @@ export function Sidebar({ user, workspaces }: SidebarProps) {
   const pathname = usePathname();
   const [workspaceOpen, setWorkspaceOpen] = useState(false);
 
-  // Derive active workspace from URL
   const workspaceMatch = pathname.match(/^\/workspaces\/([^/]+)/);
   const activeWorkspaceId = workspaceMatch?.[1] ?? workspaces[0]?.id;
   const activeWorkspace = workspaces.find((w) => w.id === activeWorkspaceId);
@@ -43,7 +42,7 @@ export function Sidebar({ user, workspaces }: SidebarProps) {
       <div className="flex h-12 items-center justify-between border-b border-border px-4">
         <Link
           href="/dashboard"
-          className="font-mono text-sm font-semibold tracking-tight text-fg-primary"
+          className="font-mono text-sm font-bold tracking-tight text-accent-mid"
         >
           crest
         </Link>
@@ -62,8 +61,8 @@ export function Sidebar({ user, workspaces }: SidebarProps) {
               href={item.href}
               className={`flex items-center gap-2.5 rounded-md px-2.5 py-1.5 text-xs font-medium transition-colors ${
                 isActive
-                  ? "bg-accent-mid/10 text-accent-mid"
-                  : "text-fg-secondary hover:bg-bg-secondary hover:text-fg-primary"
+                  ? "border-l-2 border-accent-mid bg-accent-mid/10 text-accent-mid"
+                  : "border-l-2 border-transparent text-fg-secondary hover:bg-bg-secondary hover:text-fg-primary"
               }`}
             >
               <item.icon active={isActive} />
@@ -73,24 +72,32 @@ export function Sidebar({ user, workspaces }: SidebarProps) {
         })}
       </nav>
 
-      {/* Divider */}
-      <div className="mx-3 border-t border-border" />
+      {/* Divider with accent dot */}
+      <div className="relative mx-3">
+        <div className="border-t border-border" />
+        <div className="absolute left-1/2 top-0 -translate-x-1/2 -translate-y-1/2">
+          <div className="h-1.5 w-1.5 rounded-full bg-accent-light" />
+        </div>
+      </div>
 
       {/* Workspace section */}
       <div className="flex-1 overflow-y-auto px-2 pt-3">
+        <p className="mb-1.5 px-2.5 text-[10px] font-medium uppercase tracking-widest text-accent-light">
+          Workspace
+        </p>
         <div className="relative mb-2">
           <button
             onClick={() => setWorkspaceOpen(!workspaceOpen)}
-            className="flex w-full items-center justify-between rounded-md px-2.5 py-1.5 text-xs text-fg-muted transition-colors hover:text-fg-secondary"
+            className="flex w-full items-center justify-between rounded-md border border-border-subtle px-2.5 py-1.5 text-xs font-medium text-fg-primary transition-colors hover:border-accent-mid/30 hover:text-accent-mid"
           >
-            <span className="truncate font-medium uppercase tracking-wider">
+            <span className="truncate">
               {activeWorkspace?.name ?? "No workspace"}
             </span>
             <ChevronIcon open={workspaceOpen} />
           </button>
 
           {workspaceOpen && workspaces.length > 0 && (
-            <div className="absolute left-0 top-full z-20 mt-1 w-full rounded-md border border-border bg-bg-elevated p-1 shadow-lg">
+            <div className="absolute left-0 top-full z-20 mt-1 w-full rounded-md border border-border bg-bg-elevated p-1 shadow-lg shadow-accent-mid/5">
               {workspaces.map((ws) => (
                 <Link
                   key={ws.id}
@@ -111,7 +118,7 @@ export function Sidebar({ user, workspaces }: SidebarProps) {
                   onClick={() => setWorkspaceOpen(false)}
                   className="block rounded-md px-2.5 py-1.5 text-xs text-fg-muted transition-colors hover:bg-bg-secondary hover:text-fg-primary"
                 >
-                  All workspaces
+                  All workspaces →
                 </Link>
               </div>
             </div>
@@ -147,7 +154,7 @@ export function Sidebar({ user, workspaces }: SidebarProps) {
       {/* User footer */}
       <div className="border-t border-border p-3">
         <div className="flex items-center gap-2.5">
-          <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-accent-mid/15 text-xs font-medium text-accent-mid">
+          <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-accent-strong/15 font-mono text-xs font-bold text-accent-strong">
             {user.name?.charAt(0)?.toUpperCase() ?? "?"}
           </div>
           <div className="min-w-0 flex-1">
@@ -158,7 +165,7 @@ export function Sidebar({ user, workspaces }: SidebarProps) {
           </div>
           <button
             onClick={() => signOut({ callbackUrl: "/sign-in" })}
-            className="shrink-0 rounded-md p-1 text-fg-muted transition-colors hover:bg-bg-secondary hover:text-fg-secondary"
+            className="shrink-0 rounded-md p-1 text-fg-muted transition-colors hover:bg-bg-secondary hover:text-accent-strong"
             aria-label="Sign out"
           >
             <svg

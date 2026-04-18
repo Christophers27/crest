@@ -21,7 +21,8 @@ export default async function DashboardPage() {
     <div className="mx-auto max-w-4xl">
       <div>
         <h1 className="font-mono text-lg font-semibold text-fg-primary">
-          Welcome back, {session!.user!.name}
+          Welcome back,{" "}
+          <span className="text-accent-mid">{session!.user!.name}</span>
         </h1>
         <p className="mt-1 text-xs text-fg-muted">
           Here&apos;s what&apos;s happening across your workspaces.
@@ -29,8 +30,16 @@ export default async function DashboardPage() {
       </div>
 
       <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        <StatCard label="Workspaces" value={workspaceCount} />
-        <StatCard label="Unread Notifications" value={notifications.length} />
+        <StatCard
+          label="Workspaces"
+          value={workspaceCount}
+          accent="light"
+        />
+        <StatCard
+          label="Unread Notifications"
+          value={notifications.length}
+          accent="strong"
+        />
       </div>
 
       {notifications.length > 0 && (
@@ -38,18 +47,19 @@ export default async function DashboardPage() {
           <h2 className="font-mono text-sm font-medium text-fg-primary">
             Recent Notifications
           </h2>
+          <div className="mt-1 h-px w-8 bg-accent-light" />
           <ul className="mt-3 space-y-2">
             {notifications.map((notification) => (
               <li
                 key={notification.id}
-                className="rounded-md border border-border bg-bg-elevated/60 p-3 backdrop-blur-sm"
+                className="rounded-md border border-border bg-bg-elevated/60 p-3 backdrop-blur-sm transition-colors hover:border-accent-light/30"
               >
                 <p className="text-xs text-fg-secondary">
                   {notification.message}
                 </p>
                 {notification.task && (
                   <p className="mt-1 font-mono text-[10px] text-accent-mid">
-                    {notification.task.title}
+                    → {notification.task.title}
                   </p>
                 )}
                 <p className="mt-1 text-[10px] text-fg-muted">
@@ -64,9 +74,25 @@ export default async function DashboardPage() {
   );
 }
 
-function StatCard({ label, value }: { label: string; value: number }) {
+function StatCard({
+  label,
+  value,
+  accent,
+}: {
+  label: string;
+  value: number;
+  accent: "light" | "mid" | "strong";
+}) {
+  const accentColors = {
+    light: "border-l-accent-light",
+    mid: "border-l-accent-mid",
+    strong: "border-l-accent-strong",
+  };
+
   return (
-    <div className="rounded-md border border-border bg-bg-elevated/60 p-4 backdrop-blur-sm">
+    <div
+      className={`rounded-md border border-border border-l-2 ${accentColors[accent]} bg-bg-elevated/60 p-4 backdrop-blur-sm`}
+    >
       <p className="text-[10px] font-medium uppercase tracking-wider text-fg-muted">
         {label}
       </p>
