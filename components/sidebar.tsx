@@ -10,6 +10,7 @@ import {
   Inbox,
   ChevronDown,
   LogOut,
+  Plus,
 } from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Logo } from "@/components/logo";
@@ -40,7 +41,7 @@ export function Sidebar({ user, workspaces }: SidebarProps) {
   const pathname = usePathname();
   const [workspaceOpen, setWorkspaceOpen] = useState(false);
 
-  const workspaceMatch = pathname.match(/^\/workspaces\/([^/]+)/);
+  const workspaceMatch = pathname.match(/^\/dashboard\/workspaces\/([^/]+)/);
   const activeWorkspaceId = workspaceMatch?.[1] ?? workspaces[0]?.id;
   const activeWorkspace = workspaces.find((w) => w.id === activeWorkspaceId);
 
@@ -106,12 +107,12 @@ export function Sidebar({ user, workspaces }: SidebarProps) {
             />
           </button>
 
-          {workspaceOpen && workspaces.length > 0 && (
+          {workspaceOpen && (
             <div className="absolute left-0 top-full z-20 mt-1 w-full rounded-md border border-border bg-bg-elevated p-1 shadow-lg shadow-accent/5">
               {workspaces.map((ws) => (
                 <Link
                   key={ws.id}
-                  href={`/workspaces/${ws.id}`}
+                  href={`/dashboard/workspaces/${ws.id}`}
                   onClick={() => setWorkspaceOpen(false)}
                   className={`block rounded-md px-2.5 py-1.5 text-xs transition-colors ${
                     ws.id === activeWorkspaceId
@@ -124,11 +125,19 @@ export function Sidebar({ user, workspaces }: SidebarProps) {
               ))}
               <div className="mt-1 border-t border-border pt-1">
                 <Link
-                  href="/workspaces"
+                  href="/dashboard/workspaces"
                   onClick={() => setWorkspaceOpen(false)}
                   className="block rounded-md px-2.5 py-1.5 text-xs text-fg-muted transition-colors hover:bg-bg-secondary hover:text-fg-primary"
                 >
                   All workspaces →
+                </Link>
+                <Link
+                  href="/dashboard/workspaces/new"
+                  onClick={() => setWorkspaceOpen(false)}
+                  className="flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs text-accent transition-colors hover:bg-accent/10"
+                >
+                  <Plus size={11} />
+                  Create workspace
                 </Link>
               </div>
             </div>
@@ -138,7 +147,7 @@ export function Sidebar({ user, workspaces }: SidebarProps) {
         {activeWorkspace && (
           <nav className="space-y-0.5">
             {workspaceNavigation.map((item) => {
-              const href = `/workspaces/${activeWorkspaceId}${item.segment}`;
+              const href = `/dashboard/workspaces/${activeWorkspaceId}${item.segment}`;
               const isActive =
                 item.segment === ""
                   ? pathname === href

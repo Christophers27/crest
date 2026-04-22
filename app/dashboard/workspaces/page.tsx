@@ -62,7 +62,7 @@ export default async function WorkspacesPage() {
           {memberships.map(({ workspace, role }) => (
             <Link
               key={workspace.id}
-              href={`/workspaces/${workspace.id}`}
+              href={`/dashboard/workspaces/${workspace.id}`}
               className="group rounded-md border border-border bg-bg-elevated/60 p-4 backdrop-blur-sm transition-all hover:border-accent/40 hover:shadow-[0_0_24px_-8px] hover:shadow-accent/20"
             >
               <div className="flex items-center gap-2">
