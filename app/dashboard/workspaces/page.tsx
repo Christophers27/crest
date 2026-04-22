@@ -1,7 +1,7 @@
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
-import { Plus } from "lucide-react";
+import { Plus, Search } from "lucide-react";
 
 export default async function WorkspacesPage() {
   const session = await auth();
@@ -31,13 +31,22 @@ export default async function WorkspacesPage() {
             Manage and access your workspaces
           </p>
         </div>
-        <Link
-          href="/dashboard/workspaces/new"
-          className="flex items-center gap-1.5 rounded-md bg-accent px-3 py-1.5 text-xs font-medium text-bg-primary transition-all hover:bg-accent-emphasis hover:shadow-[0_0_16px_-4px] hover:shadow-accent/40"
-        >
-          <Plus size={12} />
-          Create Workspace
-        </Link>
+        <div className="flex items-center gap-2">
+          <Link
+            href="/dashboard/workspaces/browse"
+            className="flex items-center gap-1.5 rounded-md border border-border px-3 py-1.5 text-xs font-medium text-fg-secondary transition-colors hover:border-accent/30 hover:text-fg-primary"
+          >
+            <Search size={12} />
+            Browse
+          </Link>
+          <Link
+            href="/dashboard/workspaces/new"
+            className="flex items-center gap-1.5 rounded-md bg-accent px-3 py-1.5 text-xs font-medium text-bg-primary transition-all hover:bg-accent-emphasis hover:shadow-[0_0_16px_-4px] hover:shadow-accent/40"
+          >
+            <Plus size={12} />
+            Create
+          </Link>
+        </div>
       </div>
 
       <div className="mt-2 h-px bg-linear-to-r from-accent-subtle via-accent to-transparent" />

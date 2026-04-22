@@ -2,7 +2,22 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { Plus, LayoutList, Timer } from "lucide-react";
+import {
+  Plus,
+  LayoutList,
+  Timer,
+  Settings,
+  Users,
+  Tag,
+  Shield,
+  Calendar,
+} from "lucide-react";
+import {
+  hasPermission,
+  Permission,
+  PERMISSION_LABELS,
+  PermissionKey,
+} from "@/lib/permissions";
 
 export default async function WorkspaceOverviewPage({
   params,
@@ -16,6 +31,7 @@ export default async function WorkspaceOverviewPage({
   const membership = await prisma.workspaceMember.findUnique({
     where: { userId_workspaceId: { userId, workspaceId } },
     include: {
+      role: true,
       workspace: {
         include: {
           boards: {
@@ -26,6 +42,11 @@ export default async function WorkspaceOverviewPage({
             orderBy: { createdAt: "desc" },
             include: { _count: { select: { tasks: true } } },
           },
+          tags: { orderBy: { name: "asc" } },
+          roles: {
+            orderBy: { name: "asc" },
+            include: { _count: { select: { members: true } } },
+          },
           _count: { select: { members: true } },
         },
       },
@@ -35,20 +56,62 @@ export default async function WorkspaceOverviewPage({
   if (!membership) notFound();
 
   const { workspace } = membership;
+  const canManage = hasPermission(
+    membership.role.permissions,
+    Permission.MANAGE_WORKSPACE,
+  );
+
+  const JOIN_POLICY_LABELS = {
+    INVITE_ONLY: "Invite Only",
+    APPLY_TO_JOIN: "Apply to Join",
+    OPEN: "Open",
+  };
 
   return (
     <div className="mx-auto max-w-4xl">
-      <div>
-        <h1 className="font-mono text-lg font-semibold text-fg-primary">
-          {workspace.name}
-        </h1>
-        {workspace.description && (
-          <p className="mt-1 text-xs text-fg-muted">{workspace.description}</p>
-        )}
-        <p className="mt-1 text-[10px] text-fg-muted">
-          {workspace._count.members} member
-          {workspace._count.members !== 1 && "s"}
-        </p>
+      {/* Header */}
+      <div className="flex items-start justify-between">
+        <div>
+          <h1 className="font-mono text-lg font-semibold text-fg-primary">
+            {workspace.name}
+          </h1>
+          {workspace.description && (
+            <p className="mt-1 text-xs text-fg-muted">
+              {workspace.description}
+            </p>
+          )}
+          <div className="mt-1.5 flex items-center gap-3 text-[10px] text-fg-muted">
+            <span>
+              {workspace._count.members} member
+              {workspace._count.members !== 1 && "s"}
+            </span>
+            <span className="text-border">·</span>
+            <span>{JOIN_POLICY_LABELS[workspace.joinPolicy]}</span>
+            <span className="text-border">·</span>
+            <span className="flex items-center gap-1">
+              <Calendar size={10} />
+              {workspace.createdAt.toLocaleDateString()}
+            </span>
+          </div>
+        </div>
+        <div className="flex items-center gap-2">
+          <Link
+            href={`/dashboard/workspaces/${workspaceId}/team`}
+            className="flex items-center gap-1.5 rounded-md bg-bg-secondary px-2.5 py-1.5 text-[11px] font-medium text-fg-secondary transition-colors hover:text-fg-primary"
+          >
+            <Users size={12} />
+            Team
+          </Link>
+          {canManage && (
+            <Link
+              href={`/dashboard/workspaces/${workspaceId}/settings`}
+              className="flex items-center gap-1.5 rounded-md bg-bg-secondary px-2.5 py-1.5 text-[11px] font-medium text-fg-secondary transition-colors hover:text-fg-primary"
+            >
+              <Settings size={12} />
+              Settings
+            </Link>
+          )}
+        </div>
       </div>
 
       {/* Boards */}
@@ -66,7 +129,6 @@ export default async function WorkspaceOverviewPage({
             New Board
           </Link>
         </div>
-
         {workspace.boards.length === 0 ? (
           <p className="mt-4 text-xs text-fg-muted">
             No boards yet. Create one to start organizing tasks.
@@ -111,7 +173,6 @@ export default async function WorkspaceOverviewPage({
             New Sprint
           </Link>
         </div>
-
         {workspace.sprints.length === 0 ? (
           <p className="mt-4 text-xs text-fg-muted">
             No sprints yet. Create one to organize tasks into time-based cycles.
@@ -128,7 +189,8 @@ export default async function WorkspaceOverviewPage({
                     {sprint.title}
                   </p>
                   <p className="mt-0.5 text-[10px] text-fg-muted">
-                    {sprint._count.tasks} task{sprint._count.tasks !== 1 && "s"}
+                    {sprint._count.tasks} task
+                    {sprint._count.tasks !== 1 && "s"}
                     {sprint.startDate && sprint.endDate && (
                       <>
                         {" · "}
@@ -152,6 +214,82 @@ export default async function WorkspaceOverviewPage({
           </div>
         )}
       </section>
+
+      {/* Tags & Roles side-by-side */}
+      <div className="mt-8 grid gap-6 lg:grid-cols-2">
+        {/* Tags */}
+        <section>
+          <h2 className="flex items-center gap-2 font-mono text-sm font-medium text-fg-primary">
+            <Tag size={14} className="text-accent" />
+            Tags
+          </h2>
+          {workspace.tags.length === 0 ? (
+            <p className="mt-3 text-xs text-fg-muted">No tags defined yet.</p>
+          ) : (
+            <div className="mt-3 flex flex-wrap gap-2">
+              {workspace.tags.map((tag) => (
+                <span
+                  key={tag.id}
+                  className="rounded-full border px-2.5 py-0.5 text-[10px] font-medium"
+                  style={{
+                    borderColor: (tag.color ?? "#6B7280") + "40",
+                    color: tag.color ?? "#6B7280",
+                  }}
+                >
+                  {tag.name}
+                </span>
+              ))}
+            </div>
+          )}
+        </section>
+
+        {/* Roles */}
+        <section>
+          <h2 className="flex items-center gap-2 font-mono text-sm font-medium text-fg-primary">
+            <Shield size={14} className="text-accent" />
+            Roles
+          </h2>
+          {workspace.roles.length === 0 ? (
+            <p className="mt-3 text-xs text-fg-muted">No roles defined.</p>
+          ) : (
+            <div className="mt-3 space-y-2">
+              {workspace.roles.map((role) => (
+                <div
+                  key={role.id}
+                  className="rounded-md border border-border bg-bg-elevated/60 px-3 py-2 backdrop-blur-sm"
+                >
+                  <div className="flex items-center justify-between">
+                    <span
+                      className="text-xs font-medium"
+                      style={{ color: role.color }}
+                    >
+                      {role.name}
+                    </span>
+                    <span className="text-[10px] text-fg-muted">
+                      {role._count.members} member
+                      {role._count.members !== 1 && "s"}
+                    </span>
+                  </div>
+                  <div className="mt-1 flex flex-wrap gap-1">
+                    {(
+                      Object.entries(Permission) as [PermissionKey, number][]
+                    ).map(([key, val]) =>
+                      hasPermission(role.permissions, val) ? (
+                        <span
+                          key={key}
+                          className="rounded bg-bg-secondary px-1.5 py-0.5 text-[9px] text-fg-muted"
+                        >
+                          {PERMISSION_LABELS[key]}
+                        </span>
+                      ) : null,
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </section>
+      </div>
     </div>
   );
 }
