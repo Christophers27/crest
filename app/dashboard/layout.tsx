@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { Sidebar } from "@/app/(dashboard)/_components/sidebar";
+import { Sidebar } from "@/components/sidebar";
 
 export default async function DashboardLayout({
   children,

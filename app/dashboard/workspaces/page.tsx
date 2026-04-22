@@ -1,6 +1,7 @@
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
+import { Plus } from "lucide-react";
 
 export default async function WorkspacesPage() {
   const session = await auth();
@@ -31,26 +32,27 @@ export default async function WorkspacesPage() {
           </p>
         </div>
         <Link
-          href="/workspaces/new"
-          className="rounded-md bg-accent-mid px-3 py-1.5 text-xs font-medium text-bg-primary transition-all hover:bg-accent-strong hover:shadow-[0_0_16px_-4px] hover:shadow-accent-mid/40"
+          href="/dashboard/workspaces/new"
+          className="flex items-center gap-1.5 rounded-md bg-accent px-3 py-1.5 text-xs font-medium text-bg-primary transition-all hover:bg-accent-emphasis hover:shadow-[0_0_16px_-4px] hover:shadow-accent/40"
         >
-          + Create Workspace
+          <Plus size={12} />
+          Create Workspace
         </Link>
       </div>
 
-      <div className="mt-2 h-px bg-linear-to-r from-accent-light via-accent-mid to-transparent" />
+      <div className="mt-2 h-px bg-linear-to-r from-accent-subtle via-accent to-transparent" />
 
       {memberships.length === 0 ? (
         <div className="mt-16 text-center">
-          <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-accent-light/10">
-            <span className="text-lg text-accent-light">+</span>
+          <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-accent-subtle/10">
+            <Plus size={20} className="text-accent-subtle" />
           </div>
           <p className="text-xs text-fg-muted">
             You&apos;re not a member of any workspaces yet.
           </p>
           <Link
-            href="/workspaces/new"
-            className="mt-4 inline-block rounded-md bg-accent-mid px-3 py-1.5 text-xs font-medium text-bg-primary transition-all hover:bg-accent-strong"
+            href="/dashboard/workspaces/new"
+            className="mt-4 inline-block rounded-md bg-accent px-3 py-1.5 text-xs font-medium text-bg-primary transition-all hover:bg-accent-emphasis"
           >
             Create your first workspace
           </Link>
@@ -61,11 +63,11 @@ export default async function WorkspacesPage() {
             <Link
               key={workspace.id}
               href={`/workspaces/${workspace.id}`}
-              className="group rounded-md border border-border bg-bg-elevated/60 p-4 backdrop-blur-sm transition-all hover:border-accent-mid/40 hover:shadow-[0_0_24px_-8px] hover:shadow-accent-mid/20"
+              className="group rounded-md border border-border bg-bg-elevated/60 p-4 backdrop-blur-sm transition-all hover:border-accent/40 hover:shadow-[0_0_24px_-8px] hover:shadow-accent/20"
             >
               <div className="flex items-center gap-2">
-                <div className="h-2 w-2 rounded-full bg-accent-light" />
-                <h3 className="font-mono text-sm font-medium text-fg-primary transition-colors group-hover:text-accent-mid">
+                <div className="h-2 w-2 rounded-full bg-accent-subtle" />
+                <h3 className="font-mono text-sm font-medium text-fg-primary transition-colors group-hover:text-accent">
                   {workspace.name}
                 </h3>
               </div>

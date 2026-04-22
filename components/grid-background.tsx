@@ -21,7 +21,6 @@ export function GridBackground() {
 
   return (
     <div className="pointer-events-none fixed inset-0 z-0">
-      {/* Base grid — always visible, subtle */}
       <div
         className="absolute inset-0"
         style={{
@@ -32,7 +31,6 @@ export function GridBackground() {
           backgroundSize: "24px 24px",
         }}
       />
-      {/* Highlighted grid — follows mouse cursor */}
       <div
         className="absolute inset-0"
         style={{

@@ -22,7 +22,7 @@ export default async function DashboardPage() {
       <div>
         <h1 className="font-mono text-lg font-semibold text-fg-primary">
           Welcome back,{" "}
-          <span className="text-accent-mid">{session!.user!.name}</span>
+          <span className="text-accent">{session!.user!.name}</span>
         </h1>
         <p className="mt-1 text-xs text-fg-muted">
           Here&apos;s what&apos;s happening across your workspaces.
@@ -33,12 +33,12 @@ export default async function DashboardPage() {
         <StatCard
           label="Workspaces"
           value={workspaceCount}
-          accent="light"
+          barColor="#f1c258"
         />
         <StatCard
           label="Unread Notifications"
           value={notifications.length}
-          accent="strong"
+          barColor="#f0a468"
         />
       </div>
 
@@ -47,18 +47,18 @@ export default async function DashboardPage() {
           <h2 className="font-mono text-sm font-medium text-fg-primary">
             Recent Notifications
           </h2>
-          <div className="mt-1 h-px w-8 bg-accent-light" />
+          <div className="mt-1 h-px w-8 bg-accent-subtle" />
           <ul className="mt-3 space-y-2">
             {notifications.map((notification) => (
               <li
                 key={notification.id}
-                className="rounded-md border border-border bg-bg-elevated/60 p-3 backdrop-blur-sm transition-colors hover:border-accent-light/30"
+                className="rounded-md border border-border bg-bg-elevated/60 p-3 backdrop-blur-sm transition-colors hover:border-accent-subtle/30"
               >
                 <p className="text-xs text-fg-secondary">
                   {notification.message}
                 </p>
                 {notification.task && (
-                  <p className="mt-1 font-mono text-[10px] text-accent-mid">
+                  <p className="mt-1 font-mono text-[10px] text-accent">
                     → {notification.task.title}
                   </p>
                 )}
@@ -77,28 +77,28 @@ export default async function DashboardPage() {
 function StatCard({
   label,
   value,
-  accent,
+  barColor,
 }: {
   label: string;
   value: number;
-  accent: "light" | "mid" | "strong";
+  barColor?: string;
 }) {
-  const accentColors = {
-    light: "border-l-accent-light",
-    mid: "border-l-accent-mid",
-    strong: "border-l-accent-strong",
-  };
-
   return (
-    <div
-      className={`rounded-md border border-border border-l-2 ${accentColors[accent]} bg-bg-elevated/60 p-4 backdrop-blur-sm`}
-    >
-      <p className="text-[10px] font-medium uppercase tracking-wider text-fg-muted">
-        {label}
-      </p>
-      <p className="mt-1.5 font-mono text-2xl font-semibold text-fg-primary">
-        {value}
-      </p>
+    <div className="relative overflow-hidden rounded-md border border-border bg-bg-elevated/60 backdrop-blur-sm">
+      {barColor && (
+        <div
+          className="absolute left-0 top-0 h-full w-1"
+          style={{ backgroundColor: barColor }}
+        />
+      )}
+      <div className="p-4 pl-5">
+        <p className="text-[10px] font-medium uppercase tracking-wider text-fg-muted">
+          {label}
+        </p>
+        <p className="mt-1.5 font-mono text-2xl font-semibold text-fg-primary">
+          {value}
+        </p>
+      </div>
     </div>
   );
 }

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
+import { isEmailAllowed } from "@/lib/whitelist";
 
 export async function POST(request: Request) {
   try {
@@ -17,6 +18,13 @@ export async function POST(request: Request) {
       return NextResponse.json(
         { error: "Password must be at least 8 characters" },
         { status: 400 }
+      );
+    }
+
+    if (!isEmailAllowed(email)) {
+      return NextResponse.json(
+        { error: "This email is not authorized to register" },
+        { status: 403 }
       );
     }
 
