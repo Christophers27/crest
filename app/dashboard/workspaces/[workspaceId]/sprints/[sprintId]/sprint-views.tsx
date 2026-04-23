@@ -78,6 +78,7 @@ export function SprintViews({
         <KanbanBoard
           columns={columns}
           boardId=""
+          variant="detailed"
           workspaceId={workspaceId}
           canCreate={false}
         />

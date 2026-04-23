@@ -8,6 +8,7 @@ import { getLeaveWarning } from "@/lib/actions/workspace";
 import { InviteSection } from "./invite-section";
 import { ApplicationList } from "./application-list";
 import { LeaveWorkspaceButton } from "./leave-button";
+import { MemberRoleSelect } from "./member-role-select";
 
 export default async function WorkspaceTeamPage({
   params,
@@ -33,40 +34,50 @@ export default async function WorkspaceTeamPage({
     membership.role.permissions,
     Permission.MANAGE_APPLICATIONS,
   );
+  const canManageRoles = hasPermission(
+    membership.role.permissions,
+    Permission.MANAGE_ROLES,
+  );
 
-  const [members, applications, invitations, workspace] = await Promise.all([
-    prisma.workspaceMember.findMany({
-      where: { workspaceId },
-      include: {
-        user: { select: { id: true, name: true, email: true } },
-        role: { select: { name: true, color: true } },
-      },
-      orderBy: { joinedAt: "asc" },
-    }),
-    canManageApps
-      ? prisma.workspaceApplication.findMany({
-          where: { workspaceId, status: "PENDING" },
-          include: {
-            user: { select: { id: true, name: true, email: true } },
-          },
-          orderBy: { createdAt: "desc" },
-        })
-      : [],
-    canInvite
-      ? prisma.workspaceInvitation.findMany({
-          where: { workspaceId },
-          include: {
-            createdBy: { select: { name: true } },
-          },
-          orderBy: { createdAt: "desc" },
-          take: 20,
-        })
-      : [],
-    prisma.workspace.findUnique({
-      where: { id: workspaceId },
-      select: { name: true },
-    }),
-  ]);
+  const [members, applications, invitations, workspace, roles] =
+    await Promise.all([
+      prisma.workspaceMember.findMany({
+        where: { workspaceId },
+        include: {
+          user: { select: { id: true, name: true, email: true } },
+          role: { select: { id: true, name: true, color: true } },
+        },
+        orderBy: { joinedAt: "asc" },
+      }),
+      canManageApps
+        ? prisma.workspaceApplication.findMany({
+            where: { workspaceId, status: "PENDING" },
+            include: {
+              user: { select: { id: true, name: true, email: true } },
+            },
+            orderBy: { createdAt: "desc" },
+          })
+        : [],
+      canInvite
+        ? prisma.workspaceInvitation.findMany({
+            where: { workspaceId },
+            include: {
+              createdBy: { select: { name: true } },
+            },
+            orderBy: { createdAt: "desc" },
+            take: 20,
+          })
+        : [],
+      prisma.workspace.findUnique({
+        where: { id: workspaceId },
+        select: { name: true },
+      }),
+      prisma.role.findMany({
+        where: { workspaceId },
+        select: { id: true, name: true, color: true },
+        orderBy: { name: "asc" },
+      }),
+    ]);
 
   return (
     <div className="mx-auto max-w-3xl">
@@ -123,15 +134,13 @@ export default async function WorkspaceTeamPage({
                 <span className="text-[11px] text-fg-muted">
                   Joined {member.joinedAt.toLocaleDateString()}
                 </span>
-                <span
-                  className="rounded-full border px-2 py-0.5 text-[11px] font-medium"
-                  style={{
-                    borderColor: member.role.color + "40",
-                    color: member.role.color,
-                  }}
-                >
-                  {member.role.name}
-                </span>
+                <MemberRoleSelect
+                  memberId={member.id}
+                  currentRoleId={member.role.id}
+                  roles={roles}
+                  workspaceId={workspaceId}
+                  canManage={canManageRoles}
+                />
               </div>
             </div>
           ))}

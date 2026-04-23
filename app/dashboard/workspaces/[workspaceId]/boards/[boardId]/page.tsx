@@ -121,6 +121,7 @@ export default async function BoardDetailPage({
         <KanbanBoard
           columns={columns}
           boardId={boardId}
+          variant="detailed"
           workspaceId={workspaceId}
           canCreate={canCreate}
         />

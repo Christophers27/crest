@@ -14,43 +14,16 @@ import { updateTaskStatus } from "@/lib/actions/task";
 import { hasPermission, Permission } from "@/lib/permissions";
 import { TaskStatus } from "@/prisma/generated/prisma/enums";
 import { CreateTaskForm } from "./[boardId]/create-task-form";
-
-interface Task {
-  id: string;
-  title: string;
-  description: string | null;
-  status: TaskStatus;
-  priority: string;
-  dueDate: Date | null;
-  author: { name: string | null };
-  assignees: { id: string; name: string | null }[];
-  tags: { name: string; color: string | null }[];
-}
+import { TaskCard, type TaskCardData } from "@/components/task-card";
 
 interface Board {
   id: string;
   name: string;
   description: string | null;
   isActive: boolean;
-  tasks: Task[];
+  tasks: TaskCardData[];
   _count: { tasks: number };
 }
-
-const PRIORITY_INDICATORS: Record<string, string> = {
-  URGENT: "!!!!",
-  HIGH: "!!!",
-  MEDIUM: "!!",
-  LOW: "!",
-  NONE: "",
-};
-
-const PRIORITY_COLORS: Record<string, string> = {
-  URGENT: "#ef4444",
-  HIGH: "#f0a468",
-  MEDIUM: "#f1c258",
-  LOW: "#6bc96b",
-  NONE: "",
-};
 
 export function BoardRow({
   board,
@@ -168,11 +141,10 @@ export function BoardRow({
                 onClick={(e) => {
                   if (
                     !confirm(
-                      `Delete "${board.name}"? All tasks in this board will be permanently deleted.`,
+                      `Delete "${board.name}"? All tasks will be permanently deleted.`,
                     )
-                  ) {
+                  )
                     e.preventDefault();
-                  }
                 }}
               >
                 <Trash2 size={12} />
@@ -187,23 +159,19 @@ export function BoardRow({
         <div className="grid gap-px lg:grid-cols-4">
           {tasksByStatus.map((column) => (
             <div key={column.status} className="p-2">
-              {/* Column header */}
-              <div className="mb-2 flex items-center justify-between">
-                <div className="flex items-center gap-1.5">
-                  <div
-                    className="h-1.5 w-1.5 rounded-full"
-                    style={{ backgroundColor: column.color }}
-                  />
-                  <span className="text-[11px] font-medium text-fg-muted">
-                    {column.label}
-                  </span>
-                  <span className="text-[11px] text-fg-muted">
-                    ({column.tasks.length})
-                  </span>
-                </div>
+              <div className="mb-2 flex items-center gap-1.5">
+                <div
+                  className="h-1.5 w-1.5 rounded-full"
+                  style={{ backgroundColor: column.color }}
+                />
+                <span className="text-[11px] font-medium text-fg-muted">
+                  {column.label}
+                </span>
+                <span className="text-[11px] text-fg-muted">
+                  ({column.tasks.length})
+                </span>
               </div>
 
-              {/* Droppable task list */}
               <Droppable droppableId={column.status}>
                 {(provided, snapshot) => (
                   <div
@@ -226,57 +194,18 @@ export function BoardRow({
                             ref={provided.innerRef}
                             {...provided.draggableProps}
                             {...provided.dragHandleProps}
-                            className={`rounded border bg-bg-primary/60 p-2 transition-colors ${
-                              snapshot.isDragging
-                                ? "border-accent/40 shadow-lg shadow-accent/10"
-                                : "border-border-subtle hover:border-accent/20"
-                            }`}
+                            className={snapshot.isDragging ? "opacity-90" : ""}
                           >
-                            <div className="flex items-start gap-1.5">
-                              {task.priority !== "NONE" && (
-                                <span
-                                  className="shrink-0 font-mono text-[10px] font-bold"
-                                  style={{
-                                    color: PRIORITY_COLORS[task.priority],
-                                  }}
-                                >
-                                  {PRIORITY_INDICATORS[task.priority]}
-                                </span>
-                              )}
-                              <Link
-                                href={`/dashboard/workspaces/${workspaceId}/boards/${board.id}/tasks/${task.id}`}
-                                className="font-mono text-xs font-medium text-fg-primary line-clamp-2 hover:text-accent"
-                                onClick={(e) => e.stopPropagation()}
-                              >
-                                {task.title}
-                              </Link>
-                            </div>
-                            <div className="mt-1 flex items-center gap-1.5 flex-wrap">
-                              {task.tags.map((tag) => (
-                                <span
-                                  key={tag.name}
-                                  className="rounded px-1 py-px text-[9px]"
-                                  style={{
-                                    backgroundColor:
-                                      (tag.color ?? "#6B7280") + "15",
-                                    color: tag.color ?? "#6B7280",
-                                  }}
-                                >
-                                  {tag.name}
-                                </span>
-                              ))}
-                              {task.assignees.length > 0 && (
-                                <span className="text-[10px] text-fg-muted">
-                                  {task.assignees.map((a) => a.name).join(", ")}
-                                </span>
-                              )}
-                              {task.dueDate && (
-                                <span className="text-[10px] text-fg-muted">
-                                  Due{" "}
-                                  {new Date(task.dueDate).toLocaleDateString()}
-                                </span>
-                              )}
-                            </div>
+                            <TaskCard
+                              task={{ ...task, boardId: board.id }}
+                              variant="simple"
+                              workspaceId={workspaceId}
+                              className={
+                                snapshot.isDragging
+                                  ? "border-accent/40 shadow-lg shadow-accent/10"
+                                  : ""
+                              }
+                            />
                           </div>
                         )}
                       </Draggable>
@@ -292,7 +221,6 @@ export function BoardRow({
                 )}
               </Droppable>
 
-              {/* Add task to this column */}
               {canCreate && board.isActive && (
                 <div className="mt-1.5">
                   <CreateTaskForm

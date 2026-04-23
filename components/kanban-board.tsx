@@ -10,54 +10,34 @@ import { useTransition } from "react";
 import Link from "next/link";
 import { updateTaskStatus } from "@/lib/actions/task";
 import { CreateTaskForm } from "@/app/dashboard/workspaces/[workspaceId]/boards/[boardId]/create-task-form";
-
-interface Task {
-  id: string;
-  title: string;
-  description: string | null;
-  status: string;
-  priority: string;
-  boardId?: string;
-  author: { name: string | null };
-  assignees: { id: string; name: string | null }[];
-  tags: { name: string; color: string | null }[];
-  board?: { id: string; name: string };
-}
+import { TaskCard, type TaskCardData } from "@/components/task-card";
 
 interface Column {
   status: string;
   label: string;
   color: string;
-  tasks: Task[];
+  tasks: TaskCardData[];
 }
-
-const PRIORITY_COLORS: Record<string, string> = {
-  URGENT: "#ef4444",
-  HIGH: "#f0a468",
-  MEDIUM: "#f1c258",
-  LOW: "#6bc96b",
-  NONE: "",
-};
 
 export function KanbanBoard({
   columns,
   boardId,
   workspaceId,
   canCreate,
+  variant = "simple",
 }: {
   columns: Column[];
   boardId: string;
   workspaceId: string;
   canCreate: boolean;
+  variant?: "simple" | "detailed";
 }) {
   const [isPending, startTransition] = useTransition();
 
   function onDragEnd(result: DropResult) {
     if (!result.destination) return;
-
     const newStatus = result.destination.droppableId;
     const taskId = result.draggableId;
-
     if (result.source.droppableId === newStatus) return;
 
     startTransition(async () => {
@@ -104,7 +84,7 @@ export function KanbanBoard({
                 <div
                   ref={provided.innerRef}
                   {...provided.droppableProps}
-                  className={`min-h-[60px] max-h-[60vh] space-y-2 overflow-y-auto rounded-md p-1 pr-1 transition-colors ${
+                  className={`min-h-[60px] max-h-[60vh] space-y-2 overflow-y-auto rounded-md p-1 transition-colors ${
                     snapshot.isDraggingOver
                       ? "bg-accent/5 ring-1 ring-accent/20"
                       : ""
@@ -121,63 +101,18 @@ export function KanbanBoard({
                           ref={provided.innerRef}
                           {...provided.draggableProps}
                           {...provided.dragHandleProps}
-                          className={`rounded-md border bg-bg-elevated/60 p-3 backdrop-blur-sm transition-colors ${
-                            snapshot.isDragging
-                              ? "border-accent/40 shadow-lg shadow-accent/10"
-                              : "border-border hover:border-accent/30"
-                          }`}
+                          className={snapshot.isDragging ? "opacity-90" : ""}
                         >
-                          <div className="flex items-start gap-1.5">
-                            {task.priority !== "NONE" && (
-                              <div
-                                className="mt-0.5 h-1.5 w-1.5 shrink-0 rounded-full"
-                                style={{
-                                  backgroundColor:
-                                    PRIORITY_COLORS[task.priority],
-                                }}
-                              />
-                            )}
-                            <Link
-                              href={`/dashboard/workspaces/${workspaceId}/boards/${task.board?.id ?? boardId}/tasks/${task.id}`}
-                              className="font-mono text-xs font-medium text-fg-primary hover:text-accent"
-                              onClick={(e) => e.stopPropagation()}
-                            >
-                              {task.title}
-                            </Link>
-                          </div>
-                          {task.description && (
-                            <p className="mt-1 text-[11px] text-fg-muted line-clamp-2">
-                              {task.description}
-                            </p>
-                          )}
-                          {task.tags.length > 0 && (
-                            <div className="mt-1.5 flex flex-wrap gap-1">
-                              {task.tags.map((tag) => (
-                                <span
-                                  key={tag.name}
-                                  className="rounded px-1 py-px text-[9px]"
-                                  style={{
-                                    backgroundColor:
-                                      (tag.color ?? "#6B7280") + "15",
-                                    color: tag.color ?? "#6B7280",
-                                  }}
-                                >
-                                  {tag.name}
-                                </span>
-                              ))}
-                            </div>
-                          )}
-                          <div className="mt-2 flex items-center gap-2 text-[11px] text-fg-muted">
-                            <span>{task.author.name}</span>
-                            {task.assignees.length > 0 && (
-                              <>
-                                <span className="text-border">→</span>
-                                <span>
-                                  {task.assignees.map((a) => a.name).join(", ")}
-                                </span>
-                              </>
-                            )}
-                          </div>
+                          <TaskCard
+                            task={task}
+                            variant={variant}
+                            workspaceId={workspaceId}
+                            className={
+                              snapshot.isDragging
+                                ? "border-accent/40 shadow-lg shadow-accent/10"
+                                : ""
+                            }
+                          />
                         </div>
                       )}
                     </Draggable>

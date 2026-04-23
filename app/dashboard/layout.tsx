@@ -26,6 +26,11 @@ export default async function DashboardLayout({
             select: { id: true, name: true },
             orderBy: { displayOrder: "asc" },
           },
+          sprints: {
+            where: { isActive: true },
+            select: { id: true, title: true },
+            orderBy: { createdAt: "desc" },
+          },
         },
       },
     },

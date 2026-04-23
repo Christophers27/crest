@@ -19,6 +19,7 @@ import {
   PermissionKey,
 } from "@/lib/permissions";
 import { TagManager } from "@/components/tag-manager";
+import { RoleManager } from "@/components/role-manager";
 
 export default async function WorkspaceOverviewPage({
   params,
@@ -253,45 +254,16 @@ export default async function WorkspaceOverviewPage({
             <Shield size={14} className="text-accent" />
             Roles
           </h2>
-          {workspace.roles.length === 0 ? (
-            <p className="mt-3 text-xs text-fg-muted">No roles defined.</p>
-          ) : (
-            <div className="mt-3 space-y-2">
-              {workspace.roles.map((role) => (
-                <div
-                  key={role.id}
-                  className="rounded-md border border-border bg-bg-elevated/60 px-3 py-2 backdrop-blur-sm"
-                >
-                  <div className="flex items-center justify-between">
-                    <span
-                      className="text-xs font-medium"
-                      style={{ color: role.color }}
-                    >
-                      {role.name}
-                    </span>
-                    <span className="text-[11px] text-fg-muted">
-                      {role._count.members} member
-                      {role._count.members !== 1 && "s"}
-                    </span>
-                  </div>
-                  <div className="mt-1 flex flex-wrap gap-1">
-                    {(
-                      Object.entries(Permission) as [PermissionKey, number][]
-                    ).map(([key, val]) =>
-                      hasPermission(role.permissions, val) ? (
-                        <span
-                          key={key}
-                          className="rounded bg-bg-secondary px-1.5 py-0.5 text-[10px] text-fg-muted"
-                        >
-                          {PERMISSION_LABELS[key]}
-                        </span>
-                      ) : null,
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
+          <div className="mt-3">
+            <RoleManager
+              roles={workspace.roles}
+              workspaceId={workspaceId}
+              canManage={hasPermission(
+                membership.role.permissions,
+                Permission.MANAGE_ROLES,
+              )}
+            />
+          </div>
         </section>
       </div>
     </div>

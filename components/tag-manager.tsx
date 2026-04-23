@@ -98,7 +98,6 @@ function TagItem({
     },
     null,
   );
-  const [, deleteAction, deletePending] = useActionState(deleteTag, null);
 
   const color = tag.color ?? "#6B7280";
 
@@ -112,46 +111,27 @@ function TagItem({
         defaultColor={color}
         workspaceId={workspaceId}
         tagId={tag.id}
+        canDelete={canDelete}
         onCancel={() => setEditing(false)}
       />
     );
   }
 
   return (
-    <div className="group flex items-center gap-1">
+    <div className="group relative">
       <span
         className="rounded-full border px-2.5 py-1 text-xs font-medium"
         style={{ borderColor: color + "40", color }}
       >
         {tag.name}
       </span>
-      {(canEdit || canDelete) && (
-        <div className="flex items-center gap-0.5 opacity-0 transition-opacity group-hover:opacity-100">
-          {canEdit && (
-            <button
-              onClick={() => setEditing(true)}
-              className="rounded p-0.5 text-fg-muted hover:text-fg-secondary"
-            >
-              <Pencil size={10} />
-            </button>
-          )}
-          {canDelete && (
-            <form action={deleteAction}>
-              <input type="hidden" name="tagId" value={tag.id} />
-              <input type="hidden" name="workspaceId" value={workspaceId} />
-              <button
-                type="submit"
-                disabled={deletePending}
-                className="rounded p-0.5 text-fg-muted hover:text-accent-emphasis disabled:opacity-50"
-                onClick={(e) => {
-                  if (!confirm(`Delete tag "${tag.name}"?`)) e.preventDefault();
-                }}
-              >
-                <Trash2 size={10} />
-              </button>
-            </form>
-          )}
-        </div>
+      {canEdit && (
+        <button
+          onClick={() => setEditing(true)}
+          className="absolute -right-1 -top-1 hidden rounded-full bg-bg-elevated p-0.5 shadow-sm border border-border text-fg-muted hover:text-fg-secondary group-hover:block"
+        >
+          <Pencil size={9} />
+        </button>
       )}
     </div>
   );
@@ -194,6 +174,7 @@ function TagForm({
   defaultColor,
   workspaceId,
   tagId,
+  canDelete,
   onCancel,
 }: {
   action: (formData: FormData) => void;
@@ -203,12 +184,14 @@ function TagForm({
   defaultColor: string;
   workspaceId: string;
   tagId?: string;
+  canDelete?: boolean;
   onCancel: () => void;
 }) {
   const [color, setColor] = useState(defaultColor);
   const [customColor, setCustomColor] = useState(
     PRESET_COLORS.includes(defaultColor) ? "" : defaultColor,
   );
+  const [, deleteAction, deletePending] = useActionState(deleteTag, null);
 
   return (
     <form
@@ -223,7 +206,7 @@ function TagForm({
         <p className="mb-2 text-[11px] text-accent-emphasis">{error}</p>
       )}
 
-      <div className="flex items-center gap-2 mb-3">
+      <div className="mb-3 flex items-center gap-2">
         <div
           className="h-6 w-6 shrink-0 rounded-full border border-border"
           style={{ backgroundColor: color }}
@@ -279,21 +262,45 @@ function TagForm({
         />
       </div>
 
-      <div className="flex justify-end gap-1.5">
-        <button
-          type="button"
-          onClick={onCancel}
-          className="rounded px-2 py-1 text-xs text-fg-muted hover:text-fg-secondary"
-        >
-          <X size={12} />
-        </button>
-        <button
-          type="submit"
-          disabled={pending}
-          className="rounded bg-accent px-2 py-1 text-xs font-medium text-bg-primary hover:bg-accent-emphasis disabled:opacity-50"
-        >
-          {pending ? "..." : <Check size={12} />}
-        </button>
+      <div className="flex items-center justify-between">
+        {/* Delete button (only in edit mode) */}
+        {tagId && canDelete ? (
+          <button
+            type="button"
+            disabled={deletePending}
+            className="flex items-center gap-1 rounded px-2 py-1 text-xs text-fg-muted hover:text-accent-emphasis disabled:opacity-50"
+            onClick={() => {
+              if (confirm(`Delete tag "${defaultName}"?`)) {
+                const fd = new FormData();
+                fd.set("tagId", tagId);
+                fd.set("workspaceId", workspaceId);
+                deleteAction(fd);
+              }
+            }}
+          >
+            <Trash2 size={11} />
+            Delete
+          </button>
+        ) : (
+          <div />
+        )}
+
+        <div className="flex gap-1.5">
+          <button
+            type="button"
+            onClick={onCancel}
+            className="rounded px-2 py-1 text-xs text-fg-muted hover:text-fg-secondary"
+          >
+            <X size={12} />
+          </button>
+          <button
+            type="submit"
+            disabled={pending}
+            className="rounded bg-accent px-2 py-1 text-xs font-medium text-bg-primary hover:bg-accent-emphasis disabled:opacity-50"
+          >
+            {pending ? "..." : <Check size={12} />}
+          </button>
+        </div>
       </div>
     </form>
   );

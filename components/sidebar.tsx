@@ -24,10 +24,16 @@ interface Board {
   name: string;
 }
 
+interface Sprint {
+  id: string;
+  title: string;
+}
+
 interface Workspace {
   id: string;
   name: string;
   boards: Board[];
+  sprints: Sprint[];
 }
 
 interface SidebarProps {
@@ -49,6 +55,7 @@ export function Sidebar({ user, workspaces }: SidebarProps) {
   const pathname = usePathname();
   const [workspaceOpen, setWorkspaceOpen] = useState(false);
   const [boardsExpanded, setBoardsExpanded] = useState(true);
+  const [sprintsExpanded, setSprintsExpanded] = useState(true);
   const [lastWorkspaceId, setLastWorkspaceId] = useState<string | undefined>(
     undefined,
   );
@@ -231,15 +238,56 @@ export function Sidebar({ user, workspaces }: SidebarProps) {
               )}
             </div>
 
-            {/* Sprints */}
-            <SidebarLink
-              href={`/dashboard/workspaces/${activeWorkspaceId}/sprints`}
-              icon={Timer}
-              label="Sprints"
-              active={pathname.startsWith(
-                `/dashboard/workspaces/${activeWorkspaceId}/sprints`,
+            {/* Sprints — expandable */}
+            <div>
+              <div className="flex items-center">
+                <button
+                  onClick={() => setSprintsExpanded(!sprintsExpanded)}
+                  className="shrink-0 rounded p-0.5 text-fg-muted hover:text-fg-secondary"
+                >
+                  {sprintsExpanded ? (
+                    <ChevronDown size={10} />
+                  ) : (
+                    <ChevronRight size={10} />
+                  )}
+                </button>
+                <Link
+                  href={`/dashboard/workspaces/${activeWorkspaceId}/sprints`}
+                  className={`flex flex-1 items-center gap-2 rounded-md px-2 py-1.5 text-xs font-medium transition-colors ${
+                    pathname.startsWith(
+                      `/dashboard/workspaces/${activeWorkspaceId}/sprints`,
+                    )
+                      ? "bg-accent/10 text-accent"
+                      : "text-fg-secondary hover:bg-bg-secondary hover:text-fg-primary"
+                  }`}
+                >
+                  <Timer size={13} />
+                  Sprints
+                </Link>
+              </div>
+
+              {sprintsExpanded && activeWorkspace.sprints.length > 0 && (
+                <div className="ml-4 mt-0.5 space-y-0.5 border-l border-border-subtle pl-2">
+                  {activeWorkspace.sprints.map((sprint) => {
+                    const sprintHref = `/dashboard/workspaces/${activeWorkspaceId}/sprints/${sprint.id}`;
+                    const isSprintActive = pathname.startsWith(sprintHref);
+                    return (
+                      <Link
+                        key={sprint.id}
+                        href={sprintHref}
+                        className={`block truncate rounded-md px-2 py-1 text-xs transition-colors ${
+                          isSprintActive
+                            ? "text-accent"
+                            : "text-fg-muted hover:text-fg-secondary"
+                        }`}
+                      >
+                        {sprint.title}
+                      </Link>
+                    );
+                  })}
+                </div>
               )}
-            />
+            </div>
 
             {/* Team */}
             <SidebarLink

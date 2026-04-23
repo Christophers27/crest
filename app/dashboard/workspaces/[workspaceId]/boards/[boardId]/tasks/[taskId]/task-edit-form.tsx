@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import { updateTask, deleteTask } from "@/lib/actions/task";
 import { setTaskTags } from "@/lib/actions/tag";
 import { Trash2 } from "lucide-react";
@@ -229,14 +229,30 @@ function TagPicker({
   tags: { id: string; name: string; color: string | null }[];
   selectedTagIds: string[];
 }) {
+  const [selected, setSelected] = useState<Set<string>>(
+    new Set(selectedTagIds),
+  );
   const [state, action, pending] = useActionState(setTaskTags, null);
 
   if (tags.length === 0) return null;
+
+  function toggle(id: string) {
+    setSelected((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }
 
   return (
     <form action={action} className="mt-4 border-t border-border pt-4">
       <input type="hidden" name="taskId" value={taskId} />
       <input type="hidden" name="workspaceId" value={workspaceId} />
+      {/* Hidden inputs for selected tag IDs */}
+      {Array.from(selected).map((id) => (
+        <input key={id} type="hidden" name="tagIds" value={id} />
+      ))}
 
       <label className="block text-[11px] font-medium text-fg-muted">
         Tags
@@ -252,21 +268,21 @@ function TagPicker({
       <div className="mt-1.5 flex flex-wrap gap-1.5">
         {tags.map((tag) => {
           const color = tag.color ?? "#6B7280";
+          const isSelected = selected.has(tag.id);
           return (
-            <label
+            <button
               key={tag.id}
-              className="flex cursor-pointer items-center gap-1.5 rounded-full border px-2 py-0.5 text-xs transition-colors hover:opacity-80"
-              style={{ borderColor: color + "40", color }}
+              type="button"
+              onClick={() => toggle(tag.id)}
+              className="rounded-full border px-2.5 py-0.5 text-xs font-medium transition-all"
+              style={{
+                borderColor: color + (isSelected ? "80" : "40"),
+                color: isSelected ? "#fff" : color,
+                backgroundColor: isSelected ? color : "transparent",
+              }}
             >
-              <input
-                type="checkbox"
-                name="tagIds"
-                value={tag.id}
-                defaultChecked={selectedTagIds.includes(tag.id)}
-                className="sr-only"
-              />
-              <span className="peer-checked:font-bold">{tag.name}</span>
-            </label>
+              {tag.name}
+            </button>
           );
         })}
       </div>
