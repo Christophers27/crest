@@ -5,6 +5,7 @@ import Link from "next/link";
 import { ArrowLeft, Plus, LayoutList } from "lucide-react";
 import { TaskStatus } from "@/prisma/generated/prisma/enums";
 import { BoardRow } from "./board-row";
+import { BoardFilters } from "./board-filters";
 
 const STATUS_ORDER: TaskStatus[] = [
   "NOT_STARTED",
@@ -32,10 +33,22 @@ export default async function BoardsPage({
   searchParams,
 }: {
   params: Promise<{ workspaceId: string }>;
-  searchParams: Promise<{ showArchived?: string; q?: string }>;
+  searchParams: Promise<{
+    showArchived?: string;
+    q?: string;
+    board?: string;
+    status?: string;
+    tag?: string;
+  }>;
 }) {
   const { workspaceId } = await params;
-  const { showArchived, q } = await searchParams;
+  const {
+    showArchived,
+    q,
+    board: boardFilter,
+    status: statusFilter,
+    tag: tagFilter,
+  } = await searchParams;
   const session = await auth();
   const userId = session!.user!.id!;
 
@@ -48,22 +61,34 @@ export default async function BoardsPage({
 
   const includeArchived = showArchived === "true";
 
+  // Build task filter
+  const taskWhere: Record<string, unknown> = {};
+  if (q) {
+    taskWhere.OR = [
+      { title: { contains: q, mode: "insensitive" } },
+      { description: { contains: q, mode: "insensitive" } },
+    ];
+  }
+  if (statusFilter && STATUS_ORDER.includes(statusFilter as TaskStatus)) {
+    taskWhere.status = statusFilter;
+  }
+  if (tagFilter) {
+    taskWhere.tags = { some: { name: tagFilter } };
+  }
+
+  const hasTaskFilter = Object.keys(taskWhere).length > 0;
+
+  // Board filter
+  const boardWhere: Record<string, unknown> = { workspaceId };
+  if (!includeArchived) boardWhere.isActive = true;
+  if (boardFilter) boardWhere.id = boardFilter;
+
   const boards = await prisma.board.findMany({
-    where: {
-      workspaceId,
-      ...(includeArchived ? {} : { isActive: true }),
-    },
+    where: boardWhere,
     orderBy: { displayOrder: "asc" },
     include: {
       tasks: {
-        where: q
-          ? {
-              OR: [
-                { title: { contains: q, mode: "insensitive" } },
-                { description: { contains: q, mode: "insensitive" } },
-              ],
-            }
-          : {},
+        where: hasTaskFilter ? taskWhere : {},
         orderBy: { createdAt: "desc" },
         include: {
           author: { select: { name: true } },
@@ -75,9 +100,20 @@ export default async function BoardsPage({
     },
   });
 
-  const archivedCount = await prisma.board.count({
-    where: { workspaceId, isActive: false },
-  });
+  // Get all boards and tags for filter dropdowns
+  const [allBoards, allTags, archivedCount] = await Promise.all([
+    prisma.board.findMany({
+      where: { workspaceId, isActive: true },
+      select: { id: true, name: true },
+      orderBy: { displayOrder: "asc" },
+    }),
+    prisma.tag.findMany({
+      where: { workspaceId },
+      select: { name: true, color: true },
+      orderBy: { name: "asc" },
+    }),
+    prisma.board.count({ where: { workspaceId, isActive: false } }),
+  ]);
 
   return (
     <div className="mx-auto max-w-6xl">
@@ -105,32 +141,19 @@ export default async function BoardsPage({
         </Link>
       </div>
 
-      {/* Search + filters */}
-      <div className="mt-4 flex items-center gap-3">
-        <form className="flex-1">
-          <input
-            name="q"
-            type="text"
-            defaultValue={q ?? ""}
-            placeholder="Search tasks across all boards..."
-            className="w-full rounded-md border border-border bg-bg-primary px-3 py-1.5 font-mono text-xs text-fg-primary placeholder-fg-muted transition-colors focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent/50"
-          />
-          {showArchived === "true" && (
-            <input type="hidden" name="showArchived" value="true" />
-          )}
-        </form>
-        {archivedCount > 0 && (
-          <Link
-            href={`/dashboard/workspaces/${workspaceId}/boards${
-              includeArchived ? "" : "?showArchived=true"
-            }${q ? `${includeArchived ? "?" : "&"}q=${q}` : ""}`}
-            className="shrink-0 rounded-md border border-border px-2.5 py-1.5 text-[11px] text-fg-muted transition-colors hover:text-fg-secondary"
-          >
-            {includeArchived
-              ? "Hide archived"
-              : `Show archived (${archivedCount})`}
-          </Link>
-        )}
+      {/* Filters */}
+      <div className="mt-4">
+        <BoardFilters
+          workspaceId={workspaceId}
+          boards={allBoards}
+          tags={allTags}
+          currentQ={q}
+          currentBoard={boardFilter}
+          currentStatus={statusFilter}
+          currentTag={tagFilter}
+          showArchived={includeArchived}
+          archivedCount={archivedCount}
+        />
       </div>
 
       {/* Status column headers */}
@@ -152,10 +175,11 @@ export default async function BoardsPage({
           ))}
         </div>
 
-        {/* Board rows */}
         {boards.length === 0 ? (
           <p className="mt-8 text-center text-xs text-fg-muted">
-            {q ? "No tasks match your search." : "No boards yet."}
+            {hasTaskFilter || boardFilter
+              ? "No results match your filters."
+              : "No boards yet."}
           </p>
         ) : (
           <div className="space-y-3">

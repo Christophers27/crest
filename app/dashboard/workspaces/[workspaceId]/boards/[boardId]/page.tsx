@@ -5,8 +5,8 @@ import Link from "next/link";
 import { ArrowLeft, Calendar } from "lucide-react";
 import { TaskStatus } from "@/prisma/generated/prisma/enums";
 import { hasPermission, Permission } from "@/lib/permissions";
-import { CreateTaskForm } from "./create-task-form";
 import { BoardActions } from "./board-actions";
+import { KanbanBoard } from "@/components/kanban-board";
 
 const STATUS_ORDER: TaskStatus[] = [
   "NOT_STARTED",
@@ -27,14 +27,6 @@ const STATUS_COLORS: Record<TaskStatus, string> = {
   IN_PROGRESS: "#f1c258",
   IN_REVIEW: "#f0a468",
   COMPLETED: "#6bc96b",
-};
-
-const PRIORITY_COLORS: Record<string, string> = {
-  URGENT: "#ef4444",
-  HIGH: "#f0a468",
-  MEDIUM: "#f1c258",
-  LOW: "#6bc96b",
-  NONE: "",
 };
 
 export default async function BoardDetailPage({
@@ -74,7 +66,7 @@ export default async function BoardDetailPage({
     Permission.CREATE_CONTENT,
   );
 
-  const tasksByStatus = STATUS_ORDER.map((status) => ({
+  const columns = STATUS_ORDER.map((status) => ({
     status,
     label: STATUS_LABELS[status],
     color: STATUS_COLORS[status],
@@ -125,95 +117,13 @@ export default async function BoardDetailPage({
         />
       </div>
 
-      {/* Kanban columns */}
-      <div className="mt-6 grid gap-4 lg:grid-cols-4">
-        {tasksByStatus.map((column) => (
-          <div key={column.status}>
-            <div className="mb-3 flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <div
-                  className="h-2 w-2 rounded-full"
-                  style={{ backgroundColor: column.color }}
-                />
-                <h3 className="text-xs font-medium text-fg-secondary">
-                  {column.label}
-                </h3>
-                <span className="text-[10px] text-fg-muted">
-                  {column.tasks.length}
-                </span>
-              </div>
-              {canCreate && (
-                <CreateTaskForm
-                  boardId={boardId}
-                  workspaceId={workspaceId}
-                  defaultStatus={column.status}
-                  compact
-                />
-              )}
-            </div>
-
-            <div className="max-h-[60vh] space-y-2 overflow-y-auto pr-1">
-              {column.tasks.map((task) => (
-                <div
-                  key={task.id}
-                  className="rounded-md border border-border bg-bg-elevated/60 p-3 backdrop-blur-sm transition-colors hover:border-accent/30"
-                >
-                  <div className="flex items-start gap-1.5">
-                    {task.priority !== "NONE" && (
-                      <div
-                        className="mt-0.5 h-1.5 w-1.5 shrink-0 rounded-full"
-                        style={{
-                          backgroundColor: PRIORITY_COLORS[task.priority],
-                        }}
-                      />
-                    )}
-                    <p className="font-mono text-xs font-medium text-fg-primary">
-                      {task.title}
-                    </p>
-                  </div>
-                  {task.description && (
-                    <p className="mt-1 text-[10px] text-fg-muted line-clamp-2">
-                      {task.description}
-                    </p>
-                  )}
-                  {task.tags.length > 0 && (
-                    <div className="mt-1.5 flex flex-wrap gap-1">
-                      {task.tags.map((tag) => (
-                        <span
-                          key={tag.name}
-                          className="rounded px-1 py-px text-[8px]"
-                          style={{
-                            backgroundColor: (tag.color ?? "#6B7280") + "15",
-                            color: tag.color ?? "#6B7280",
-                          }}
-                        >
-                          {tag.name}
-                        </span>
-                      ))}
-                    </div>
-                  )}
-                  <div className="mt-2 flex items-center gap-2 text-[10px] text-fg-muted">
-                    <span>{task.author.name}</span>
-                    {task.assignees.length > 0 && (
-                      <>
-                        <span className="text-border">→</span>
-                        <span>
-                          {task.assignees.map((a) => a.name).join(", ")}
-                        </span>
-                      </>
-                    )}
-                  </div>
-                </div>
-              ))}
-
-              {column.tasks.length === 0 && (
-                <p className="py-4 text-center text-[10px] text-fg-muted">
-                  No tasks
-                </p>
-              )}
-            </div>
-          </div>
-        ))}
+      <div className="mt-6">
+        <KanbanBoard
+          columns={columns}
+          boardId={boardId}
+          workspaceId={workspaceId}
+          canCreate={canCreate}
+        />
       </div>
     </div>
   );
