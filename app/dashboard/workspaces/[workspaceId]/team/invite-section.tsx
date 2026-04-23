@@ -39,9 +39,7 @@ export function InviteSection({
           className="rounded-md border border-border bg-bg-primary px-2.5 py-1.5 font-mono text-[11px] text-fg-primary transition-colors focus:border-accent focus:outline-none"
         >
           <option value="1">1 day</option>
-          <option value="7" selected>
-            7 days
-          </option>
+          <option value="7">7 days</option>
           <option value="30">30 days</option>
         </select>
         <button

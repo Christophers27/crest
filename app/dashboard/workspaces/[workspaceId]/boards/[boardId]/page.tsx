@@ -2,9 +2,11 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Calendar } from "lucide-react";
 import { TaskStatus } from "@/prisma/generated/prisma/enums";
+import { hasPermission, Permission } from "@/lib/permissions";
 import { CreateTaskForm } from "./create-task-form";
+import { BoardActions } from "./board-actions";
 
 const STATUS_ORDER: TaskStatus[] = [
   "NOT_STARTED",
@@ -27,6 +29,14 @@ const STATUS_COLORS: Record<TaskStatus, string> = {
   COMPLETED: "#6bc96b",
 };
 
+const PRIORITY_COLORS: Record<string, string> = {
+  URGENT: "#ef4444",
+  HIGH: "#f0a468",
+  MEDIUM: "#f1c258",
+  LOW: "#6bc96b",
+  NONE: "",
+};
+
 export default async function BoardDetailPage({
   params,
 }: {
@@ -38,6 +48,7 @@ export default async function BoardDetailPage({
 
   const membership = await prisma.workspaceMember.findUnique({
     where: { userId_workspaceId: { userId, workspaceId } },
+    include: { role: true },
   });
 
   if (!membership) notFound();
@@ -50,12 +61,18 @@ export default async function BoardDetailPage({
         include: {
           author: { select: { name: true } },
           assignees: { select: { id: true, name: true } },
+          tags: { select: { name: true, color: true } },
         },
       },
     },
   });
 
   if (!board || board.workspaceId !== workspaceId) notFound();
+
+  const canCreate = hasPermission(
+    membership.role.permissions,
+    Permission.CREATE_CONTENT,
+  );
 
   const tasksByStatus = STATUS_ORDER.map((status) => ({
     status,
@@ -67,28 +84,53 @@ export default async function BoardDetailPage({
   return (
     <div className="mx-auto max-w-5xl">
       <Link
-        href={`/dashboard/workspaces/${workspaceId}`}
+        href={`/dashboard/workspaces/${workspaceId}/boards`}
         className="mb-6 inline-flex items-center gap-1.5 text-xs text-fg-muted transition-colors hover:text-fg-secondary"
       >
         <ArrowLeft size={12} />
-        Back to workspace
+        All boards
       </Link>
 
-      <div className="flex items-center justify-between">
+      <div className="flex items-start justify-between">
         <div>
-          <h1 className="font-mono text-lg font-semibold text-fg-primary">
-            {board.name}
-          </h1>
+          <div className="flex items-center gap-2">
+            <h1 className="font-mono text-lg font-semibold text-fg-primary">
+              {board.name}
+            </h1>
+            {!board.isActive && (
+              <span className="rounded bg-bg-secondary px-1.5 py-0.5 text-[9px] text-fg-muted">
+                Archived
+              </span>
+            )}
+          </div>
           {board.description && (
             <p className="mt-1 text-xs text-fg-muted">{board.description}</p>
           )}
+          <div className="mt-1 flex items-center gap-1.5 text-[10px] text-fg-muted">
+            <Calendar size={10} />
+            Created {board.createdAt.toLocaleDateString()}
+            <span className="text-border">·</span>
+            {board.tasks.length} task{board.tasks.length !== 1 && "s"}
+          </div>
         </div>
+        <BoardActions
+          board={{
+            id: board.id,
+            name: board.name,
+            description: board.description,
+            isActive: board.isActive,
+          }}
+          workspaceId={workspaceId}
+          permissions={membership.role.permissions}
+        />
       </div>
 
       {/* Inline task creation */}
-      <div className="mt-6">
-        <CreateTaskForm boardId={boardId} workspaceId={workspaceId} />
-      </div>
+      {canCreate && (
+        <div className="mt-6">
+          <CreateTaskForm boardId={boardId} workspaceId={workspaceId} />
+        </div>
+      )}
 
       {/* Kanban columns */}
       <div className="mt-6 grid gap-4 lg:grid-cols-4">
@@ -107,19 +149,45 @@ export default async function BoardDetailPage({
               </span>
             </div>
 
-            <div className="space-y-2">
+            <div className="max-h-[60vh] space-y-2 overflow-y-auto pr-1">
               {column.tasks.map((task) => (
                 <div
                   key={task.id}
                   className="rounded-md border border-border bg-bg-elevated/60 p-3 backdrop-blur-sm transition-colors hover:border-accent/30"
                 >
-                  <p className="font-mono text-xs font-medium text-fg-primary">
-                    {task.title}
-                  </p>
+                  <div className="flex items-start gap-1.5">
+                    {task.priority !== "NONE" && (
+                      <div
+                        className="mt-0.5 h-1.5 w-1.5 shrink-0 rounded-full"
+                        style={{
+                          backgroundColor: PRIORITY_COLORS[task.priority],
+                        }}
+                      />
+                    )}
+                    <p className="font-mono text-xs font-medium text-fg-primary">
+                      {task.title}
+                    </p>
+                  </div>
                   {task.description && (
                     <p className="mt-1 text-[10px] text-fg-muted line-clamp-2">
                       {task.description}
                     </p>
+                  )}
+                  {task.tags.length > 0 && (
+                    <div className="mt-1.5 flex flex-wrap gap-1">
+                      {task.tags.map((tag) => (
+                        <span
+                          key={tag.name}
+                          className="rounded px-1 py-px text-[8px]"
+                          style={{
+                            backgroundColor: (tag.color ?? "#6B7280") + "15",
+                            color: tag.color ?? "#6B7280",
+                          }}
+                        >
+                          {tag.name}
+                        </span>
+                      ))}
+                    </div>
                   )}
                   <div className="mt-2 flex items-center gap-2 text-[10px] text-fg-muted">
                     <span>{task.author.name}</span>
