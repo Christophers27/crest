@@ -42,11 +42,11 @@ function ApplicationRow({ application }: { application: Application }) {
           {application.user.name ?? application.user.email}
         </p>
         {application.message && (
-          <p className="mt-0.5 text-[10px] text-fg-muted italic">
+          <p className="mt-0.5 text-[11px] text-fg-muted italic">
             &ldquo;{application.message}&rdquo;
           </p>
         )}
-        <p className="mt-0.5 text-[10px] text-fg-muted">
+        <p className="mt-0.5 text-[11px] text-fg-muted">
           Applied {new Date(application.createdAt).toLocaleDateString()}
         </p>
       </div>

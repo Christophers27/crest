@@ -1,9 +1,16 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useTransition } from "react";
 import Link from "next/link";
+import {
+  DragDropContext,
+  Droppable,
+  Draggable,
+  type DropResult,
+} from "@hello-pangea/dnd";
 import { Archive, ArchiveRestore, Trash2, Settings } from "lucide-react";
 import { archiveBoard, deleteBoard } from "@/lib/actions/board";
+import { updateTaskStatus } from "@/lib/actions/task";
 import { hasPermission, Permission } from "@/lib/permissions";
 import { TaskStatus } from "@/prisma/generated/prisma/enums";
 import { CreateTaskForm } from "./[boardId]/create-task-form";
@@ -14,6 +21,7 @@ interface Task {
   description: string | null;
   status: TaskStatus;
   priority: string;
+  dueDate: Date | null;
   author: { name: string | null };
   assignees: { id: string; name: string | null }[];
   tags: { name: string; color: string | null }[];
@@ -63,6 +71,7 @@ export function BoardRow({
 }) {
   const [, archiveAction, archivePending] = useActionState(archiveBoard, null);
   const [, deleteAction, deletePending] = useActionState(deleteBoard, null);
+  const [isDragging, startTransition] = useTransition();
 
   const canEdit = hasPermission(permissions, Permission.EDIT_CONTENT);
   const canDelete = hasPermission(permissions, Permission.DELETE_CONTENT);
@@ -75,13 +84,28 @@ export function BoardRow({
     tasks: board.tasks.filter((t) => t.status === status),
   }));
 
+  function onDragEnd(result: DropResult) {
+    if (!result.destination) return;
+    const newStatus = result.destination.droppableId;
+    const taskId = result.draggableId;
+    if (result.source.droppableId === newStatus) return;
+
+    startTransition(async () => {
+      const formData = new FormData();
+      formData.set("taskId", taskId);
+      formData.set("status", newStatus);
+      formData.set("workspaceId", workspaceId);
+      await updateTaskStatus(null, formData);
+    });
+  }
+
   return (
     <div
       className={`rounded-md border bg-bg-elevated/60 backdrop-blur-sm ${
         board.isActive
           ? "border-border"
           : "border-dashed border-border opacity-60"
-      }`}
+      } ${isDragging ? "opacity-70" : ""}`}
     >
       {/* Board header */}
       <div className="flex items-center justify-between border-b border-border px-4 py-2.5">
@@ -93,11 +117,11 @@ export function BoardRow({
             {board.name}
           </Link>
           {!board.isActive && (
-            <span className="rounded bg-bg-secondary px-1.5 py-0.5 text-[9px] text-fg-muted">
+            <span className="rounded bg-bg-secondary px-1.5 py-0.5 text-[11px] text-fg-muted">
               Archived
             </span>
           )}
-          <span className="text-[10px] text-fg-muted">
+          <span className="text-[11px] text-fg-muted">
             {board._count.tasks} task{board._count.tasks !== 1 && "s"}
             {searchQuery && board.tasks.length !== board._count.tasks && (
               <> · {board.tasks.length} matching</>
@@ -158,83 +182,131 @@ export function BoardRow({
         </div>
       </div>
 
-      {/* Status columns */}
-      <div className="grid gap-px lg:grid-cols-4">
-        {tasksByStatus.map((column) => (
-          <div key={column.status} className="p-2">
-            {/* Mobile label */}
-            <div className="mb-1.5 flex items-center gap-1.5 lg:hidden">
-              <div
-                className="h-1.5 w-1.5 rounded-full"
-                style={{ backgroundColor: column.color }}
-              />
-              <span className="text-[10px] font-medium text-fg-muted">
-                {column.label} ({column.tasks.length})
-              </span>
-            </div>
+      {/* Status columns with drag-and-drop */}
+      <DragDropContext onDragEnd={onDragEnd}>
+        <div className="grid gap-px lg:grid-cols-4">
+          {tasksByStatus.map((column) => (
+            <div key={column.status} className="p-2">
+              {/* Column header */}
+              <div className="mb-2 flex items-center justify-between">
+                <div className="flex items-center gap-1.5">
+                  <div
+                    className="h-1.5 w-1.5 rounded-full"
+                    style={{ backgroundColor: column.color }}
+                  />
+                  <span className="text-[11px] font-medium text-fg-muted">
+                    {column.label}
+                  </span>
+                  <span className="text-[11px] text-fg-muted">
+                    ({column.tasks.length})
+                  </span>
+                </div>
+              </div>
 
-            {/* Scrollable task list */}
-            <div className="max-h-64 space-y-1.5 overflow-y-auto pr-1">
-              {column.tasks.map((task) => (
-                <Link
-                  key={task.id}
-                  href={`/dashboard/workspaces/${workspaceId}/boards/${board.id}`}
-                  className="block rounded border border-border-subtle bg-bg-primary/60 p-2 transition-colors hover:border-accent/20"
-                >
-                  <div className="flex items-start gap-1.5">
-                    {task.priority !== "NONE" && (
-                      <span
-                        className="shrink-0 font-mono text-[9px] font-bold"
-                        style={{ color: PRIORITY_COLORS[task.priority] }}
+              {/* Droppable task list */}
+              <Droppable droppableId={column.status}>
+                {(provided, snapshot) => (
+                  <div
+                    ref={provided.innerRef}
+                    {...provided.droppableProps}
+                    className={`min-h-[40px] max-h-64 space-y-1.5 overflow-y-auto rounded pr-1 transition-colors ${
+                      snapshot.isDraggingOver
+                        ? "bg-accent/5 ring-1 ring-accent/20"
+                        : ""
+                    }`}
+                  >
+                    {column.tasks.map((task, index) => (
+                      <Draggable
+                        key={task.id}
+                        draggableId={task.id}
+                        index={index}
                       >
-                        {PRIORITY_INDICATORS[task.priority]}
-                      </span>
-                    )}
-                    <p className="font-mono text-[11px] font-medium text-fg-primary line-clamp-2">
-                      {task.title}
-                    </p>
-                  </div>
-                  <div className="mt-1 flex items-center gap-1.5 flex-wrap">
-                    {task.tags.map((tag) => (
-                      <span
-                        key={tag.name}
-                        className="rounded px-1 py-px text-[8px]"
-                        style={{
-                          backgroundColor: (tag.color ?? "#6B7280") + "15",
-                          color: tag.color ?? "#6B7280",
-                        }}
-                      >
-                        {tag.name}
-                      </span>
+                        {(provided, snapshot) => (
+                          <div
+                            ref={provided.innerRef}
+                            {...provided.draggableProps}
+                            {...provided.dragHandleProps}
+                            className={`rounded border bg-bg-primary/60 p-2 transition-colors ${
+                              snapshot.isDragging
+                                ? "border-accent/40 shadow-lg shadow-accent/10"
+                                : "border-border-subtle hover:border-accent/20"
+                            }`}
+                          >
+                            <div className="flex items-start gap-1.5">
+                              {task.priority !== "NONE" && (
+                                <span
+                                  className="shrink-0 font-mono text-[10px] font-bold"
+                                  style={{
+                                    color: PRIORITY_COLORS[task.priority],
+                                  }}
+                                >
+                                  {PRIORITY_INDICATORS[task.priority]}
+                                </span>
+                              )}
+                              <Link
+                                href={`/dashboard/workspaces/${workspaceId}/boards/${board.id}/tasks/${task.id}`}
+                                className="font-mono text-xs font-medium text-fg-primary line-clamp-2 hover:text-accent"
+                                onClick={(e) => e.stopPropagation()}
+                              >
+                                {task.title}
+                              </Link>
+                            </div>
+                            <div className="mt-1 flex items-center gap-1.5 flex-wrap">
+                              {task.tags.map((tag) => (
+                                <span
+                                  key={tag.name}
+                                  className="rounded px-1 py-px text-[9px]"
+                                  style={{
+                                    backgroundColor:
+                                      (tag.color ?? "#6B7280") + "15",
+                                    color: tag.color ?? "#6B7280",
+                                  }}
+                                >
+                                  {tag.name}
+                                </span>
+                              ))}
+                              {task.assignees.length > 0 && (
+                                <span className="text-[10px] text-fg-muted">
+                                  {task.assignees.map((a) => a.name).join(", ")}
+                                </span>
+                              )}
+                              {task.dueDate && (
+                                <span className="text-[10px] text-fg-muted">
+                                  Due{" "}
+                                  {new Date(task.dueDate).toLocaleDateString()}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        )}
+                      </Draggable>
                     ))}
-                    {task.assignees.length > 0 && (
-                      <span className="text-[9px] text-fg-muted">
-                        {task.assignees.map((a) => a.name).join(", ")}
-                      </span>
+                    {provided.placeholder}
+
+                    {column.tasks.length === 0 && !snapshot.isDraggingOver && (
+                      <p className="py-3 text-center text-[11px] text-fg-muted">
+                        —
+                      </p>
                     )}
                   </div>
-                </Link>
-              ))}
+                )}
+              </Droppable>
 
-              {column.tasks.length === 0 && (
-                <p className="py-3 text-center text-[9px] text-fg-muted">—</p>
+              {/* Add task to this column */}
+              {canCreate && board.isActive && (
+                <div className="mt-1.5">
+                  <CreateTaskForm
+                    boardId={board.id}
+                    workspaceId={workspaceId}
+                    defaultStatus={column.status}
+                    compact
+                  />
+                </div>
               )}
             </div>
-
-            {/* Add task to this column */}
-            {canCreate && board.isActive && (
-              <div className="mt-1.5">
-                <CreateTaskForm
-                  boardId={board.id}
-                  workspaceId={workspaceId}
-                  defaultStatus={column.status}
-                  compact
-                />
-              </div>
-            )}
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      </DragDropContext>
     </div>
   );
 }

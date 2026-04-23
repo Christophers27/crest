@@ -49,9 +49,20 @@ export function Sidebar({ user, workspaces }: SidebarProps) {
   const pathname = usePathname();
   const [workspaceOpen, setWorkspaceOpen] = useState(false);
   const [boardsExpanded, setBoardsExpanded] = useState(true);
+  const [lastWorkspaceId, setLastWorkspaceId] = useState<string | undefined>(
+    undefined,
+  );
 
   const workspaceMatch = pathname.match(/^\/dashboard\/workspaces\/([^/]+)/);
-  const activeWorkspaceId = workspaceMatch?.[1] ?? workspaces[0]?.id;
+  const urlWorkspaceId = workspaceMatch?.[1];
+
+  // When URL has a workspace, remember it
+  if (urlWorkspaceId && urlWorkspaceId !== lastWorkspaceId) {
+    setLastWorkspaceId(urlWorkspaceId);
+  }
+
+  const activeWorkspaceId =
+    urlWorkspaceId ?? lastWorkspaceId ?? workspaces[0]?.id;
   const activeWorkspace = workspaces.find((w) => w.id === activeWorkspaceId);
 
   const boardsHref = activeWorkspaceId
@@ -104,7 +115,7 @@ export function Sidebar({ user, workspaces }: SidebarProps) {
 
       {/* Workspace section */}
       <div className="flex-1 overflow-y-auto px-2 pt-3">
-        <p className="mb-1.5 px-2.5 text-[10px] font-medium uppercase tracking-widest text-accent-subtle">
+        <p className="mb-1.5 px-2.5 text-[11px] font-medium uppercase tracking-widest text-accent-subtle">
           Workspace
         </p>
 
@@ -206,7 +217,7 @@ export function Sidebar({ user, workspaces }: SidebarProps) {
                       <Link
                         key={board.id}
                         href={boardHref}
-                        className={`block truncate rounded-md px-2 py-1 text-[11px] transition-colors ${
+                        className={`block truncate rounded-md px-2 py-1 text-xs transition-colors ${
                           isBoardActive
                             ? "text-accent"
                             : "text-fg-muted hover:text-fg-secondary"
@@ -253,7 +264,7 @@ export function Sidebar({ user, workspaces }: SidebarProps) {
             <p className="truncate text-xs font-medium text-fg-primary">
               {user.name}
             </p>
-            <p className="truncate text-[10px] text-fg-muted">{user.email}</p>
+            <p className="truncate text-[11px] text-fg-muted">{user.email}</p>
           </div>
           <button
             onClick={() => signOut({ callbackUrl: "/sign-in" })}

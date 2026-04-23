@@ -30,8 +30,8 @@ export function CreateTaskForm({
     return (
       <button
         onClick={() => setOpen(true)}
-        className={`flex items-center gap-1 rounded-md border border-dashed border-border text-fg-muted transition-colors hover:border-accent/40 hover:text-accent ${
-          compact ? "px-1.5 py-1 text-[10px]" : "px-3 py-2 text-xs"
+        className={`flex items-center gap-1 rounded-md border border-border bg-bg-secondary text-fg-secondary transition-colors hover:border-accent/40 hover:text-accent ${
+          compact ? "px-2 py-1 text-[11px]" : "px-3 py-2 text-xs"
         }`}
       >
         <Plus size={compact ? 10 : 12} />
@@ -50,7 +50,7 @@ export function CreateTaskForm({
       <input type="hidden" name="status" value={defaultStatus} />
 
       <div className="mb-2 flex items-center justify-between">
-        <p className="text-[10px] font-medium text-fg-secondary">New Task</p>
+        <p className="text-[11px] font-medium text-fg-secondary">New Task</p>
         <button
           type="button"
           onClick={() => setOpen(false)}
@@ -61,7 +61,7 @@ export function CreateTaskForm({
       </div>
 
       {state?.error && (
-        <div className="mb-2 rounded border border-accent-emphasis/30 bg-accent-emphasis/10 px-2 py-1 text-[10px] text-accent-emphasis">
+        <div className="mb-2 rounded border border-accent-emphasis/30 bg-accent-emphasis/10 px-2 py-1 text-[11px] text-accent-emphasis">
           {state.error}
         </div>
       )}
@@ -88,14 +88,14 @@ export function CreateTaskForm({
         <button
           type="button"
           onClick={() => setOpen(false)}
-          className="rounded px-2 py-1 text-[10px] text-fg-muted hover:text-fg-secondary"
+          className="rounded px-2 py-1 text-[11px] text-fg-muted hover:text-fg-secondary"
         >
           Cancel
         </button>
         <button
           type="submit"
           disabled={pending}
-          className="rounded bg-accent px-2 py-1 text-[10px] font-medium text-bg-primary hover:bg-accent-emphasis disabled:opacity-50"
+          className="rounded bg-accent px-2 py-1 text-[11px] font-medium text-bg-primary hover:bg-accent-emphasis disabled:opacity-50"
         >
           {pending ? "..." : "Create"}
         </button>

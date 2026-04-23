@@ -18,8 +18,8 @@
   --bg-secondary: #eaeae8;
   --bg-elevated: #ffffff;
   --fg-primary: #1a1a19;
-  --fg-secondary: #6b6b68;
-  --fg-muted: #9c9c98;
+  --fg-secondary: #555552;
+  --fg-muted: #78786f;
 
   /* Border */
   --border: #d8d8d4;
@@ -31,8 +31,8 @@
   --accent-emphasis: #f6d67e;
 
   /* Grid */
-  --grid-line: rgba(0, 0, 0, 0.07);
-  --grid-line-highlight: rgba(0, 0, 0, 0.22);
+  --grid-dot: rgba(0, 0, 0, 0.1);
+  --grid-dot-highlight: rgba(0, 0, 0, 0.3);
 }
 
 [data-theme="dark"] {
@@ -40,8 +40,8 @@
   --bg-secondary: #161615;
   --bg-elevated: #1c1c1a;
   --fg-primary: #e8e8e5;
-  --fg-secondary: #9c9c98;
-  --fg-muted: #6b6b68;
+  --fg-secondary: #a8a8a2;
+  --fg-muted: #7d7d76;
 
   --border: #2a2a28;
   --border-subtle: #222220;
@@ -51,8 +51,8 @@
   --accent-subtle: #f1c258;
   --accent-emphasis: #f0a468;
 
-  --grid-line: rgba(255, 255, 255, 0.05);
-  --grid-line-highlight: rgba(255, 255, 255, 0.16);
+  --grid-dot: rgba(255, 255, 255, 0.06);
+  --grid-dot-highlight: rgba(255, 255, 255, 0.2);
 }
 
 @theme inline {
@@ -79,6 +79,7 @@ body {
   background: var(--bg-primary);
   color: var(--fg-primary);
   font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 14px;
 }
 
 /* ─── Scrollbar ────────────────────────────────────────────────────────── */

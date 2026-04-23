@@ -55,6 +55,7 @@ export async function createBoard(_prev: unknown, formData: FormData) {
     },
   });
 
+  revalidatePath("/dashboard", "layout");
   redirect(`/dashboard/workspaces/${workspaceId}`);
 }
 
@@ -123,6 +124,7 @@ export async function archiveBoard(_prev: unknown, formData: FormData) {
   });
 
   revalidatePath(`/dashboard/workspaces/${workspaceId}/boards`);
+  revalidatePath("/dashboard", "layout");
   return { success: true, archived: board.isActive };
 }
 
@@ -145,5 +147,6 @@ export async function deleteBoard(_prev: unknown, formData: FormData) {
 
   await prisma.board.delete({ where: { id: boardId } });
 
+  revalidatePath("/dashboard", "layout");
   redirect(`/dashboard/workspaces/${workspaceId}/boards`);
 }

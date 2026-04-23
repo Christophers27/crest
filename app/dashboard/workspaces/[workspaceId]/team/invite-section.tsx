@@ -51,7 +51,7 @@ export function InviteSection({
           {pending ? "Creating..." : "Create Invite Link"}
         </button>
         {state?.error && (
-          <span className="text-[10px] text-accent-emphasis">
+          <span className="text-[11px] text-accent-emphasis">
             {state.error}
           </span>
         )}
@@ -60,7 +60,7 @@ export function InviteSection({
       {/* Newly created link */}
       {state?.success && state.inviteId && (
         <div className="flex items-center gap-2 rounded-md border border-accent/30 bg-accent/5 px-3 py-2">
-          <code className="flex-1 truncate font-mono text-[10px] text-accent">
+          <code className="flex-1 truncate font-mono text-[11px] text-accent">
             {typeof window !== "undefined"
               ? `${window.location.origin}/invite/${state.inviteId}`
               : `/invite/${state.inviteId}`}
@@ -102,11 +102,11 @@ export function InviteSection({
                     <Copy size={11} />
                   )}
                 </button>
-                <code className="font-mono text-[10px] text-fg-muted">
+                <code className="font-mono text-[11px] text-fg-muted">
                   {inv.id.slice(0, 12)}...
                 </code>
               </div>
-              <div className="flex items-center gap-3 text-[10px] text-fg-muted">
+              <div className="flex items-center gap-3 text-[11px] text-fg-muted">
                 <span>by {inv.createdByName}</span>
                 <span className="flex items-center gap-1">
                   <Clock size={9} />

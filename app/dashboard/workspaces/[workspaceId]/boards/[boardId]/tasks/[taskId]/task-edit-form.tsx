@@ -72,7 +72,7 @@ export function TaskEditForm({ task, members, workspaceId, boardId }: Props) {
         {/* Status + Priority row */}
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <label className="block text-[10px] font-medium text-fg-muted">
+            <label className="block text-[11px] font-medium text-fg-muted">
               Status
             </label>
             <select
@@ -87,7 +87,7 @@ export function TaskEditForm({ task, members, workspaceId, boardId }: Props) {
             </select>
           </div>
           <div>
-            <label className="block text-[10px] font-medium text-fg-muted">
+            <label className="block text-[11px] font-medium text-fg-muted">
               Priority
             </label>
             <select
@@ -107,7 +107,7 @@ export function TaskEditForm({ task, members, workspaceId, boardId }: Props) {
         {/* Dates row */}
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <label className="block text-[10px] font-medium text-fg-muted">
+            <label className="block text-[11px] font-medium text-fg-muted">
               Start Date
             </label>
             <input
@@ -118,7 +118,7 @@ export function TaskEditForm({ task, members, workspaceId, boardId }: Props) {
             />
           </div>
           <div>
-            <label className="block text-[10px] font-medium text-fg-muted">
+            <label className="block text-[11px] font-medium text-fg-muted">
               Due Date
             </label>
             <input
@@ -132,7 +132,7 @@ export function TaskEditForm({ task, members, workspaceId, boardId }: Props) {
 
         {/* Points */}
         <div>
-          <label className="block text-[10px] font-medium text-fg-muted">
+          <label className="block text-[11px] font-medium text-fg-muted">
             Points
           </label>
           <input
@@ -147,7 +147,7 @@ export function TaskEditForm({ task, members, workspaceId, boardId }: Props) {
 
         {/* Assignees */}
         <div>
-          <label className="block text-[10px] font-medium text-fg-muted">
+          <label className="block text-[11px] font-medium text-fg-muted">
             Assignees
           </label>
           <div className="mt-1 space-y-1">

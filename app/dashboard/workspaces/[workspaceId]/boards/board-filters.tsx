@@ -139,7 +139,7 @@ export function BoardFilters({
       {/* Active filter chips */}
       {hasFilters && (
         <div className="flex items-center gap-1.5">
-          <span className="text-[10px] text-fg-muted">Filters:</span>
+          <span className="text-[11px] text-fg-muted">Filters:</span>
           {currentQ && (
             <FilterChip
               label={`"${currentQ}"`}
@@ -176,7 +176,7 @@ export function BoardFilters({
                 }`,
               );
             }}
-            className="text-[10px] text-accent hover:text-accent-emphasis"
+            className="text-[11px] text-accent hover:text-accent-emphasis"
           >
             Clear all
           </button>
@@ -194,7 +194,7 @@ function FilterChip({
   onRemove: () => void;
 }) {
   return (
-    <span className="flex items-center gap-1 rounded-full bg-accent/10 px-2 py-0.5 text-[10px] font-medium text-accent">
+    <span className="flex items-center gap-1 rounded-full bg-accent/10 px-2 py-0.5 text-[11px] font-medium text-accent">
       {label}
       <button onClick={onRemove} className="hover:text-accent-emphasis">
         <X size={9} />

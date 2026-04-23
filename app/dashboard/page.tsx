@@ -58,11 +58,11 @@ export default async function DashboardPage() {
                   {notification.message}
                 </p>
                 {notification.task && (
-                  <p className="mt-1 font-mono text-[10px] text-accent">
+                  <p className="mt-1 font-mono text-[11px] text-accent">
                     → {notification.task.title}
                   </p>
                 )}
-                <p className="mt-1 text-[10px] text-fg-muted">
+                <p className="mt-1 text-[11px] text-fg-muted">
                   {notification.createdAt.toLocaleDateString()}
                 </p>
               </li>
@@ -92,7 +92,7 @@ function StatCard({
         />
       )}
       <div className="p-4 pl-5">
-        <p className="text-[10px] font-medium uppercase tracking-wider text-fg-muted">
+        <p className="text-[11px] font-medium uppercase tracking-wider text-fg-muted">
           {label}
         </p>
         <p className="mt-1.5 font-mono text-2xl font-semibold text-fg-primary">

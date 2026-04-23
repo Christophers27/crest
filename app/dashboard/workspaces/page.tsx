@@ -85,7 +85,7 @@ export default async function WorkspacesPage() {
                   {workspace.description}
                 </p>
               )}
-              <div className="mt-3 flex items-center gap-3 text-[10px] text-fg-muted">
+              <div className="mt-3 flex items-center gap-3 text-[11px] text-fg-muted">
                 <span>{workspace._count.members} members</span>
                 <span className="text-border">·</span>
                 <span>{workspace._count.boards} boards</span>

@@ -83,7 +83,7 @@ export function KanbanBoard({
                 <h3 className="text-xs font-medium text-fg-secondary">
                   {column.label}
                 </h3>
-                <span className="text-[10px] text-fg-muted">
+                <span className="text-[11px] text-fg-muted">
                   {column.tasks.length}
                 </span>
               </div>
@@ -144,7 +144,7 @@ export function KanbanBoard({
                             </Link>
                           </div>
                           {task.description && (
-                            <p className="mt-1 text-[10px] text-fg-muted line-clamp-2">
+                            <p className="mt-1 text-[11px] text-fg-muted line-clamp-2">
                               {task.description}
                             </p>
                           )}
@@ -153,7 +153,7 @@ export function KanbanBoard({
                               {task.tags.map((tag) => (
                                 <span
                                   key={tag.name}
-                                  className="rounded px-1 py-px text-[8px]"
+                                  className="rounded px-1 py-px text-[9px]"
                                   style={{
                                     backgroundColor:
                                       (tag.color ?? "#6B7280") + "15",
@@ -165,7 +165,7 @@ export function KanbanBoard({
                               ))}
                             </div>
                           )}
-                          <div className="mt-2 flex items-center gap-2 text-[10px] text-fg-muted">
+                          <div className="mt-2 flex items-center gap-2 text-[11px] text-fg-muted">
                             <span>{task.author.name}</span>
                             {task.assignees.length > 0 && (
                               <>
@@ -183,7 +183,7 @@ export function KanbanBoard({
                   {provided.placeholder}
 
                   {column.tasks.length === 0 && !snapshot.isDraggingOver && (
-                    <p className="py-4 text-center text-[10px] text-fg-muted">
+                    <p className="py-4 text-center text-[11px] text-fg-muted">
                       No tasks
                     </p>
                   )}

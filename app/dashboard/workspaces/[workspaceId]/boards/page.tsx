@@ -156,25 +156,8 @@ export default async function BoardsPage({
         />
       </div>
 
-      {/* Status column headers */}
+      {/* Board rows */}
       <div className="mt-6">
-        <div className="mb-2 hidden items-center gap-1 lg:flex">
-          <div className="w-48 shrink-0" />
-          {STATUS_ORDER.map((status) => (
-            <div key={status} className="flex-1 px-1">
-              <div className="flex items-center gap-1.5">
-                <div
-                  className="h-1.5 w-1.5 rounded-full"
-                  style={{ backgroundColor: STATUS_COLORS[status] }}
-                />
-                <span className="text-[10px] font-medium text-fg-muted">
-                  {STATUS_LABELS[status]}
-                </span>
-              </div>
-            </div>
-          ))}
-        </div>
-
         {boards.length === 0 ? (
           <p className="mt-8 text-center text-xs text-fg-muted">
             {hasTaskFilter || boardFilter

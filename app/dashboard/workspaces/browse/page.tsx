@@ -87,7 +87,7 @@ export default async function BrowseWorkspacesPage() {
                     <p className="font-mono text-sm font-medium text-fg-primary">
                       {ws.name}
                     </p>
-                    <p className="text-[10px] text-fg-muted">
+                    <p className="text-[11px] text-fg-muted">
                       {ws._count.members} member
                       {ws._count.members !== 1 && "s"}
                       {ws.description && ` · ${ws.description}`}
@@ -98,7 +98,7 @@ export default async function BrowseWorkspacesPage() {
                 {ws.joinPolicy === "OPEN" ? (
                   <JoinButton workspaceId={ws.id} />
                 ) : myApplicationIds.has(ws.id) ? (
-                  <span className="rounded-full bg-bg-secondary px-2.5 py-1 text-[10px] font-medium text-fg-muted">
+                  <span className="rounded-full bg-bg-secondary px-2.5 py-1 text-[11px] font-medium text-fg-muted">
                     Applied
                   </span>
                 ) : (
@@ -139,7 +139,7 @@ export default async function BrowseWorkspacesPage() {
                   <p className="font-mono text-sm font-medium text-fg-primary">
                     {ws.name}
                   </p>
-                  <p className="text-[10px] text-fg-muted">
+                  <p className="text-[11px] text-fg-muted">
                     {ws._count.members} member
                     {ws._count.members !== 1 && "s"}
                   </p>

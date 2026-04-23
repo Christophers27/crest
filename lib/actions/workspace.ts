@@ -305,3 +305,84 @@ export async function acceptInvitation(_prev: unknown, formData: FormData) {
 
   redirect(`/dashboard/workspaces/${invitation.workspaceId}`);
 }
+
+// ─── Leave workspace ────────────────────────────────────────────────────────
+
+export async function getLeaveWarning(workspaceId: string) {
+  const session = await auth();
+  if (!session?.user?.id) throw new Error("Unauthorized");
+
+  const memberCount = await prisma.workspaceMember.count({
+    where: { workspaceId },
+  });
+
+  const workspace = await prisma.workspace.findUnique({
+    where: { id: workspaceId },
+    select: { joinPolicy: true, name: true },
+  });
+
+  if (!workspace) return null;
+
+  const isLastMember = memberCount === 1;
+
+  if (!isLastMember) {
+    return { isLastMember: false, willDelete: false, name: workspace.name };
+  }
+
+  // Last member — workspace will become empty
+  const willDeleteImmediately =
+    workspace.joinPolicy === "INVITE_ONLY" ||
+    workspace.joinPolicy === "APPLY_TO_JOIN";
+
+  return {
+    isLastMember: true,
+    willDelete: true,
+    immediate: willDeleteImmediately,
+    name: workspace.name,
+  };
+}
+
+export async function leaveWorkspace(_prev: unknown, formData: FormData) {
+  const session = await auth();
+  if (!session?.user?.id) throw new Error("Unauthorized");
+
+  const workspaceId = formData.get("workspaceId") as string;
+  if (!workspaceId) return { error: "Workspace ID is required" };
+
+  const membership = await prisma.workspaceMember.findUnique({
+    where: { userId_workspaceId: { userId: session.user.id, workspaceId } },
+  });
+
+  if (!membership) return { error: "You are not a member" };
+
+  const memberCount = await prisma.workspaceMember.count({
+    where: { workspaceId },
+  });
+
+  // Remove the member
+  await prisma.workspaceMember.delete({
+    where: { id: membership.id },
+  });
+
+  // If this was the last member, handle cleanup
+  if (memberCount === 1) {
+    const workspace = await prisma.workspace.findUnique({
+      where: { id: workspaceId },
+      select: { joinPolicy: true },
+    });
+
+    if (
+      workspace &&
+      (workspace.joinPolicy === "INVITE_ONLY" ||
+        workspace.joinPolicy === "APPLY_TO_JOIN")
+    ) {
+      // No way for new members to join — delete immediately
+      await prisma.workspace.delete({ where: { id: workspaceId } });
+    }
+    // For OPEN workspaces, a scheduled job would clean up after 7 days.
+    // For now we leave it — the workspace exists but has no members.
+  }
+
+  revalidatePath("/dashboard", "layout");
+  redirect("/dashboard/workspaces");
+}

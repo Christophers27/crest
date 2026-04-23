@@ -80,7 +80,7 @@ export default async function WorkspaceOverviewPage({
               {workspace.description}
             </p>
           )}
-          <div className="mt-1.5 flex items-center gap-3 text-[10px] text-fg-muted">
+          <div className="mt-1.5 flex items-center gap-3 text-[11px] text-fg-muted">
             <span>
               {workspace._count.members} member
               {workspace._count.members !== 1 && "s"}
@@ -135,25 +135,28 @@ export default async function WorkspaceOverviewPage({
           </p>
         ) : (
           <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {workspace.boards.map((board) => (
-              <Link
-                key={board.id}
-                href={`/dashboard/workspaces/${workspaceId}/boards/${board.id}`}
-                className="group rounded-md border border-border bg-bg-elevated/60 p-4 backdrop-blur-sm transition-all hover:border-accent/40"
-              >
-                <h3 className="font-mono text-sm font-medium text-fg-primary transition-colors group-hover:text-accent">
-                  {board.name}
-                </h3>
-                {board.description && (
-                  <p className="mt-1 text-xs text-fg-muted line-clamp-2">
-                    {board.description}
-                  </p>
-                )}
-                <p className="mt-2 text-[10px] text-fg-muted">
-                  {board._count.tasks} task{board._count.tasks !== 1 && "s"}
-                </p>
-              </Link>
-            ))}
+            {workspace.boards.map(
+              (board) =>
+                board.isActive && (
+                  <Link
+                    key={board.id}
+                    href={`/dashboard/workspaces/${workspaceId}/boards/${board.id}`}
+                    className="group rounded-md border border-border bg-bg-elevated/60 p-4 backdrop-blur-sm transition-all hover:border-accent/40"
+                  >
+                    <h3 className="font-mono text-sm font-medium text-fg-primary transition-colors group-hover:text-accent">
+                      {board.name}
+                    </h3>
+                    {board.description && (
+                      <p className="mt-1 text-xs text-fg-muted line-clamp-2">
+                        {board.description}
+                      </p>
+                    )}
+                    <p className="mt-2 text-[11px] text-fg-muted">
+                      {board._count.tasks} task{board._count.tasks !== 1 && "s"}
+                    </p>
+                  </Link>
+                ),
+            )}
           </div>
         )}
       </section>
@@ -188,7 +191,7 @@ export default async function WorkspaceOverviewPage({
                   <p className="font-mono text-sm font-medium text-fg-primary">
                     {sprint.title}
                   </p>
-                  <p className="mt-0.5 text-[10px] text-fg-muted">
+                  <p className="mt-0.5 text-[11px] text-fg-muted">
                     {sprint._count.tasks} task
                     {sprint._count.tasks !== 1 && "s"}
                     {sprint.startDate && sprint.endDate && (
@@ -201,7 +204,7 @@ export default async function WorkspaceOverviewPage({
                   </p>
                 </div>
                 <span
-                  className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${
+                  className={`rounded-full px-2 py-0.5 text-[11px] font-medium ${
                     sprint.isActive
                       ? "bg-accent/10 text-accent"
                       : "bg-bg-secondary text-fg-muted"
@@ -230,7 +233,7 @@ export default async function WorkspaceOverviewPage({
               {workspace.tags.map((tag) => (
                 <span
                   key={tag.id}
-                  className="rounded-full border px-2.5 py-0.5 text-[10px] font-medium"
+                  className="rounded-full border px-2.5 py-0.5 text-[11px] font-medium"
                   style={{
                     borderColor: (tag.color ?? "#6B7280") + "40",
                     color: tag.color ?? "#6B7280",
@@ -265,7 +268,7 @@ export default async function WorkspaceOverviewPage({
                     >
                       {role.name}
                     </span>
-                    <span className="text-[10px] text-fg-muted">
+                    <span className="text-[11px] text-fg-muted">
                       {role._count.members} member
                       {role._count.members !== 1 && "s"}
                     </span>
@@ -277,7 +280,7 @@ export default async function WorkspaceOverviewPage({
                       hasPermission(role.permissions, val) ? (
                         <span
                           key={key}
-                          className="rounded bg-bg-secondary px-1.5 py-0.5 text-[9px] text-fg-muted"
+                          className="rounded bg-bg-secondary px-1.5 py-0.5 text-[10px] text-fg-muted"
                         >
                           {PERMISSION_LABELS[key]}
                         </span>

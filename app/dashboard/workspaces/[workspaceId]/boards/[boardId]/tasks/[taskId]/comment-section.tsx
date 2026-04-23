@@ -37,7 +37,7 @@ export function CommentSection({
       <h3 className="flex items-center gap-2 font-mono text-xs font-medium text-fg-secondary">
         <MessageSquare size={13} className="text-accent" />
         Comments
-        <span className="text-[10px] text-fg-muted">({comments.length})</span>
+        <span className="text-[11px] text-fg-muted">({comments.length})</span>
       </h3>
 
       {/* Comment list */}
@@ -51,7 +51,7 @@ export function CommentSection({
         ))}
 
         {comments.length === 0 && (
-          <p className="text-[10px] text-fg-muted">No comments yet.</p>
+          <p className="text-[11px] text-fg-muted">No comments yet.</p>
         )}
       </div>
 
@@ -60,7 +60,7 @@ export function CommentSection({
         <input type="hidden" name="taskId" value={taskId} />
 
         {addState?.error && (
-          <p className="mb-2 text-[10px] text-accent-emphasis">
+          <p className="mb-2 text-[11px] text-accent-emphasis">
             {addState.error}
           </p>
         )}
@@ -93,13 +93,13 @@ function CommentItem({ comment, isOwn }: { comment: Comment; isOwn: boolean }) {
     <div className="rounded-md border border-border bg-bg-elevated/60 p-3 backdrop-blur-sm">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <div className="flex h-5 w-5 items-center justify-center rounded-full bg-accent/10 text-[8px] font-bold text-accent">
+          <div className="flex h-5 w-5 items-center justify-center rounded-full bg-accent/10 text-[9px] font-bold text-accent">
             {comment.userName?.charAt(0)?.toUpperCase() ?? "?"}
           </div>
-          <span className="text-[10px] font-medium text-fg-primary">
+          <span className="text-[11px] font-medium text-fg-primary">
             {comment.userName}
           </span>
-          <span className="text-[9px] text-fg-muted">
+          <span className="text-[10px] text-fg-muted">
             {new Date(comment.createdAt).toLocaleDateString()}{" "}
             {new Date(comment.createdAt).toLocaleTimeString([], {
               hour: "2-digit",

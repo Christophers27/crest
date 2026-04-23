@@ -135,7 +135,7 @@ export default async function TaskDetailPage({
                       }}
                     />
                     <span className="text-fg-primary">{sub.title}</span>
-                    <span className="ml-auto text-[10px] text-fg-muted">
+                    <span className="ml-auto text-[11px] text-fg-muted">
                       {STATUS_LABELS[sub.status]}
                     </span>
                   </Link>
@@ -165,7 +165,7 @@ export default async function TaskDetailPage({
           {/* Status */}
           <MetaBlock label="Status">
             <span
-              className="rounded-full px-2 py-0.5 text-[10px] font-medium"
+              className="rounded-full px-2 py-0.5 text-[11px] font-medium"
               style={{
                 backgroundColor: STATUS_COLORS[task.status] + "20",
                 color: STATUS_COLORS[task.status],
@@ -178,7 +178,7 @@ export default async function TaskDetailPage({
           {/* Priority */}
           <MetaBlock label="Priority">
             <span
-              className="rounded-full px-2 py-0.5 text-[10px] font-medium"
+              className="rounded-full px-2 py-0.5 text-[11px] font-medium"
               style={{
                 backgroundColor: PRIORITY_COLORS[task.priority] + "20",
                 color: PRIORITY_COLORS[task.priority],
@@ -200,7 +200,7 @@ export default async function TaskDetailPage({
           {/* Dates */}
           {(task.startDate || task.dueDate) && (
             <MetaBlock label="Dates">
-              <div className="space-y-1 text-[10px] text-fg-muted">
+              <div className="space-y-1 text-[11px] text-fg-muted">
                 {task.startDate && (
                   <div className="flex items-center gap-1">
                     <Calendar size={10} />
@@ -219,7 +219,7 @@ export default async function TaskDetailPage({
 
           {/* Author */}
           <MetaBlock label="Author">
-            <div className="flex items-center gap-1.5 text-[10px] text-fg-muted">
+            <div className="flex items-center gap-1.5 text-[11px] text-fg-muted">
               <User size={10} />
               {task.author.name}
             </div>
@@ -228,15 +228,15 @@ export default async function TaskDetailPage({
           {/* Assignees */}
           <MetaBlock label="Assignees">
             {task.assignees.length === 0 ? (
-              <span className="text-[10px] text-fg-muted">Unassigned</span>
+              <span className="text-[11px] text-fg-muted">Unassigned</span>
             ) : (
               <div className="space-y-1">
                 {task.assignees.map((a) => (
                   <div
                     key={a.id}
-                    className="flex items-center gap-1.5 text-[10px] text-fg-primary"
+                    className="flex items-center gap-1.5 text-[11px] text-fg-primary"
                   >
-                    <div className="flex h-4 w-4 items-center justify-center rounded-full bg-accent/10 text-[8px] font-bold text-accent">
+                    <div className="flex h-4 w-4 items-center justify-center rounded-full bg-accent/10 text-[9px] font-bold text-accent">
                       {a.name?.charAt(0)?.toUpperCase()}
                     </div>
                     {a.name}
@@ -253,7 +253,7 @@ export default async function TaskDetailPage({
                 {task.tags.map((tag) => (
                   <span
                     key={tag.id}
-                    className="rounded-full border px-1.5 py-0.5 text-[9px]"
+                    className="rounded-full border px-1.5 py-0.5 text-[10px]"
                     style={{
                       borderColor: (tag.color ?? "#6B7280") + "40",
                       color: tag.color ?? "#6B7280",
@@ -271,7 +271,7 @@ export default async function TaskDetailPage({
             <MetaBlock label="Sprints">
               <div className="space-y-1">
                 {task.sprints.map((s) => (
-                  <span key={s.id} className="block text-[10px] text-fg-muted">
+                  <span key={s.id} className="block text-[11px] text-fg-muted">
                     {s.title}
                   </span>
                 ))}
@@ -281,14 +281,14 @@ export default async function TaskDetailPage({
 
           {/* Timestamps */}
           <MetaBlock label="Created">
-            <span className="text-[10px] text-fg-muted">
+            <span className="text-[11px] text-fg-muted">
               {task.createdAt.toLocaleDateString()} at{" "}
               {task.createdAt.toLocaleTimeString()}
             </span>
           </MetaBlock>
 
           <MetaBlock label="Updated">
-            <span className="text-[10px] text-fg-muted">
+            <span className="text-[11px] text-fg-muted">
               {task.updatedAt.toLocaleDateString()} at{" "}
               {task.updatedAt.toLocaleTimeString()}
             </span>
@@ -308,7 +308,7 @@ function MetaBlock({
 }) {
   return (
     <div>
-      <p className="mb-1 text-[10px] font-medium uppercase tracking-wider text-fg-muted">
+      <p className="mb-1 text-[11px] font-medium uppercase tracking-wider text-fg-muted">
         {label}
       </p>
       {children}

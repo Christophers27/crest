@@ -15,30 +15,26 @@ export function GridBackground() {
   }, [handleMouseMove]);
 
   const maskStyle = {
-    maskImage: `radial-gradient(circle 180px at ${mousePosition.x}px ${mousePosition.y}px, white, transparent)`,
-    WebkitMaskImage: `radial-gradient(circle 180px at ${mousePosition.x}px ${mousePosition.y}px, white, transparent)`,
+    maskImage: `radial-gradient(circle 200px at ${mousePosition.x}px ${mousePosition.y}px, white, transparent)`,
+    WebkitMaskImage: `radial-gradient(circle 200px at ${mousePosition.x}px ${mousePosition.y}px, white, transparent)`,
   };
 
   return (
     <div className="pointer-events-none fixed inset-0 z-0">
+      {/* Base dots — always visible, subtle */}
       <div
         className="absolute inset-0"
         style={{
-          backgroundImage: `
-            linear-gradient(to right, var(--grid-line) 1px, transparent 1px),
-            linear-gradient(to bottom, var(--grid-line) 1px, transparent 1px)
-          `,
-          backgroundSize: "24px 24px",
+          backgroundImage: `radial-gradient(circle, var(--grid-dot) 1px, transparent 1px)`,
+          backgroundSize: "16px 16px",
         }}
       />
+      {/* Highlighted dots — follows mouse cursor */}
       <div
         className="absolute inset-0"
         style={{
-          backgroundImage: `
-            linear-gradient(to right, var(--grid-line-highlight) 1px, transparent 1px),
-            linear-gradient(to bottom, var(--grid-line-highlight) 1px, transparent 1px)
-          `,
-          backgroundSize: "24px 24px",
+          backgroundImage: `radial-gradient(circle, var(--grid-dot-highlight) 1px, transparent 1px)`,
+          backgroundSize: "16px 16px",
           ...maskStyle,
         }}
       />

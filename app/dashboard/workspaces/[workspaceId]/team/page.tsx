@@ -4,8 +4,10 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, Users, Mail, ClipboardList } from "lucide-react";
 import { hasPermission, Permission } from "@/lib/permissions";
+import { getLeaveWarning } from "@/lib/actions/workspace";
 import { InviteSection } from "./invite-section";
 import { ApplicationList } from "./application-list";
+import { LeaveWorkspaceButton } from "./leave-button";
 
 export default async function WorkspaceTeamPage({
   params,
@@ -107,22 +109,22 @@ export default async function WorkspaceTeamPage({
                   <p className="text-xs font-medium text-fg-primary">
                     {member.user.name}
                     {member.user.id === userId && (
-                      <span className="ml-1.5 text-[10px] text-fg-muted">
+                      <span className="ml-1.5 text-[11px] text-fg-muted">
                         (you)
                       </span>
                     )}
                   </p>
-                  <p className="text-[10px] text-fg-muted">
+                  <p className="text-[11px] text-fg-muted">
                     {member.user.email}
                   </p>
                 </div>
               </div>
               <div className="flex items-center gap-3">
-                <span className="text-[10px] text-fg-muted">
+                <span className="text-[11px] text-fg-muted">
                   Joined {member.joinedAt.toLocaleDateString()}
                 </span>
                 <span
-                  className="rounded-full border px-2 py-0.5 text-[10px] font-medium"
+                  className="rounded-full border px-2 py-0.5 text-[11px] font-medium"
                   style={{
                     borderColor: member.role.color + "40",
                     color: member.role.color,
@@ -164,7 +166,7 @@ export default async function WorkspaceTeamPage({
           <h2 className="flex items-center gap-2 font-mono text-sm font-medium text-fg-primary">
             <ClipboardList size={13} className="text-accent" />
             Pending Applications
-            <span className="rounded-full bg-accent/10 px-1.5 py-0.5 text-[10px] font-medium text-accent">
+            <span className="rounded-full bg-accent/10 px-1.5 py-0.5 text-[11px] font-medium text-accent">
               {applications.length}
             </span>
           </h2>
@@ -180,6 +182,14 @@ export default async function WorkspaceTeamPage({
           </div>
         </section>
       )}
+
+      {/* Leave workspace */}
+      <section className="mt-10 border-t border-border pt-6">
+        <LeaveWorkspaceButton
+          workspaceId={workspaceId}
+          leaveWarning={await getLeaveWarning(workspaceId)}
+        />
+      </section>
     </div>
   );
 }
