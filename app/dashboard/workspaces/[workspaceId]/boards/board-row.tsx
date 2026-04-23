@@ -174,7 +174,7 @@ export function BoardRow({
             </div>
 
             {/* Scrollable task list */}
-            <div className="max-h-48 space-y-1.5 overflow-y-auto pr-1">
+            <div className="max-h-64 space-y-1.5 overflow-y-auto pr-1">
               {column.tasks.map((task) => (
                 <Link
                   key={task.id}

@@ -7,6 +7,7 @@ import {
   type DropResult,
 } from "@hello-pangea/dnd";
 import { useTransition } from "react";
+import Link from "next/link";
 import { updateTaskStatus } from "@/lib/actions/task";
 import { CreateTaskForm } from "@/app/dashboard/workspaces/[workspaceId]/boards/[boardId]/create-task-form";
 
@@ -134,9 +135,13 @@ export function KanbanBoard({
                                 }}
                               />
                             )}
-                            <p className="font-mono text-xs font-medium text-fg-primary">
+                            <Link
+                              href={`/dashboard/workspaces/${workspaceId}/boards/${boardId}/tasks/${task.id}`}
+                              className="font-mono text-xs font-medium text-fg-primary hover:text-accent"
+                              onClick={(e) => e.stopPropagation()}
+                            >
                               {task.title}
-                            </p>
+                            </Link>
                           </div>
                           {task.description && (
                             <p className="mt-1 text-[10px] text-fg-muted line-clamp-2">

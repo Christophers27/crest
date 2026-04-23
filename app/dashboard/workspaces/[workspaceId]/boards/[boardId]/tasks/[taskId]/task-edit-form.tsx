@@ -1,0 +1,202 @@
+"use client";
+
+import { useActionState } from "react";
+import { updateTask, deleteTask } from "@/lib/actions/task";
+import { Trash2 } from "lucide-react";
+import { useRouter } from "next/navigation";
+
+interface Props {
+  task: {
+    id: string;
+    title: string;
+    description: string | null;
+    status: string;
+    priority: string;
+    startDate: string;
+    dueDate: string;
+    points: number | null;
+    assigneeIds: string[];
+  };
+  members: { id: string; name: string | null; email: string | null }[];
+  workspaceId: string;
+  boardId: string;
+}
+
+export function TaskEditForm({ task, members, workspaceId, boardId }: Props) {
+  const router = useRouter();
+  const [state, action, pending] = useActionState(updateTask, null);
+  const [, deleteAction, deletePending] = useActionState(
+    async (prev: unknown, formData: FormData) => {
+      const result = await deleteTask(prev, formData);
+      if (result?.success) {
+        router.push(`/dashboard/workspaces/${workspaceId}/boards/${boardId}`);
+      }
+      return result;
+    },
+    null,
+  );
+
+  return (
+    <div>
+      <form action={action} className="space-y-4">
+        <input type="hidden" name="taskId" value={task.id} />
+
+        {state?.success && (
+          <div className="rounded-md border border-accent/30 bg-accent/10 px-3 py-2 text-xs text-accent">
+            Task updated.
+          </div>
+        )}
+        {state?.error && (
+          <div className="rounded-md border border-accent-emphasis/30 bg-accent-emphasis/10 px-3 py-2 text-xs text-accent-emphasis">
+            {state.error}
+          </div>
+        )}
+
+        {/* Title */}
+        <input
+          name="title"
+          defaultValue={task.title}
+          required
+          className="block w-full rounded-md border border-border bg-bg-primary px-3 py-2 font-mono text-base font-semibold text-fg-primary transition-colors focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent/50"
+        />
+
+        {/* Description */}
+        <textarea
+          name="description"
+          defaultValue={task.description ?? ""}
+          rows={4}
+          className="block w-full resize-none rounded-md border border-border bg-bg-primary px-3 py-2 font-mono text-sm text-fg-primary placeholder-fg-muted transition-colors focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent/50"
+          placeholder="Add a description..."
+        />
+
+        {/* Status + Priority row */}
+        <div className="grid grid-cols-2 gap-3">
+          <div>
+            <label className="block text-[10px] font-medium text-fg-muted">
+              Status
+            </label>
+            <select
+              name="status"
+              defaultValue={task.status}
+              className="mt-1 block w-full rounded-md border border-border bg-bg-primary px-2 py-1.5 font-mono text-xs text-fg-primary focus:border-accent focus:outline-none"
+            >
+              <option value="NOT_STARTED">Not Started</option>
+              <option value="IN_PROGRESS">In Progress</option>
+              <option value="IN_REVIEW">In Review</option>
+              <option value="COMPLETED">Completed</option>
+            </select>
+          </div>
+          <div>
+            <label className="block text-[10px] font-medium text-fg-muted">
+              Priority
+            </label>
+            <select
+              name="priority"
+              defaultValue={task.priority}
+              className="mt-1 block w-full rounded-md border border-border bg-bg-primary px-2 py-1.5 font-mono text-xs text-fg-primary focus:border-accent focus:outline-none"
+            >
+              <option value="NONE">None</option>
+              <option value="LOW">Low</option>
+              <option value="MEDIUM">Medium</option>
+              <option value="HIGH">High</option>
+              <option value="URGENT">Urgent</option>
+            </select>
+          </div>
+        </div>
+
+        {/* Dates row */}
+        <div className="grid grid-cols-2 gap-3">
+          <div>
+            <label className="block text-[10px] font-medium text-fg-muted">
+              Start Date
+            </label>
+            <input
+              name="startDate"
+              type="date"
+              defaultValue={task.startDate}
+              className="mt-1 block w-full rounded-md border border-border bg-bg-primary px-2 py-1.5 font-mono text-xs text-fg-primary focus:border-accent focus:outline-none"
+            />
+          </div>
+          <div>
+            <label className="block text-[10px] font-medium text-fg-muted">
+              Due Date
+            </label>
+            <input
+              name="dueDate"
+              type="date"
+              defaultValue={task.dueDate}
+              className="mt-1 block w-full rounded-md border border-border bg-bg-primary px-2 py-1.5 font-mono text-xs text-fg-primary focus:border-accent focus:outline-none"
+            />
+          </div>
+        </div>
+
+        {/* Points */}
+        <div>
+          <label className="block text-[10px] font-medium text-fg-muted">
+            Points
+          </label>
+          <input
+            name="points"
+            type="number"
+            min={0}
+            defaultValue={task.points ?? ""}
+            className="mt-1 block w-24 rounded-md border border-border bg-bg-primary px-2 py-1.5 font-mono text-xs text-fg-primary focus:border-accent focus:outline-none"
+            placeholder="—"
+          />
+        </div>
+
+        {/* Assignees */}
+        <div>
+          <label className="block text-[10px] font-medium text-fg-muted">
+            Assignees
+          </label>
+          <div className="mt-1 space-y-1">
+            {members.map((m) => (
+              <label
+                key={m.id}
+                className="flex items-center gap-2 rounded-md px-2 py-1 text-xs text-fg-primary hover:bg-bg-secondary"
+              >
+                <input
+                  type="checkbox"
+                  name="assigneeIds"
+                  value={m.id}
+                  defaultChecked={task.assigneeIds.includes(m.id)}
+                  className="rounded border-border text-accent focus:ring-accent/50"
+                />
+                {m.name ?? m.email}
+              </label>
+            ))}
+          </div>
+        </div>
+
+        <div className="flex items-center justify-between pt-2">
+          <button
+            type="submit"
+            disabled={pending}
+            className="rounded-md bg-accent px-4 py-2 text-xs font-medium text-bg-primary transition-all hover:bg-accent-emphasis disabled:opacity-50"
+          >
+            {pending ? "Saving..." : "Save Changes"}
+          </button>
+        </div>
+      </form>
+
+      {/* Delete */}
+      <form action={deleteAction} className="mt-4 border-t border-border pt-4">
+        <input type="hidden" name="taskId" value={task.id} />
+        <button
+          type="submit"
+          disabled={deletePending}
+          className="flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs text-fg-muted transition-colors hover:bg-accent-emphasis/10 hover:text-accent-emphasis disabled:opacity-50"
+          onClick={(e) => {
+            if (!confirm("Delete this task? This cannot be undone.")) {
+              e.preventDefault();
+            }
+          }}
+        >
+          <Trash2 size={12} />
+          {deletePending ? "Deleting..." : "Delete task"}
+        </button>
+      </form>
+    </div>
+  );
+}
