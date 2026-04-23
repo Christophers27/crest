@@ -2,6 +2,7 @@
 
 import { useActionState } from "react";
 import { updateTask, deleteTask } from "@/lib/actions/task";
+import { setTaskTags } from "@/lib/actions/tag";
 import { Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 
@@ -16,13 +17,21 @@ interface Props {
     dueDate: string;
     points: number | null;
     assigneeIds: string[];
+    tagIds: string[];
   };
   members: { id: string; name: string | null; email: string | null }[];
+  tags: { id: string; name: string; color: string | null }[];
   workspaceId: string;
   boardId: string;
 }
 
-export function TaskEditForm({ task, members, workspaceId, boardId }: Props) {
+export function TaskEditForm({
+  task,
+  members,
+  tags,
+  workspaceId,
+  boardId,
+}: Props) {
   const router = useRouter();
   const [state, action, pending] = useActionState(updateTask, null);
   const [, deleteAction, deletePending] = useActionState(
@@ -180,6 +189,14 @@ export function TaskEditForm({ task, members, workspaceId, boardId }: Props) {
         </div>
       </form>
 
+      {/* Tags */}
+      <TagPicker
+        taskId={task.id}
+        workspaceId={workspaceId}
+        tags={tags}
+        selectedTagIds={task.tagIds}
+      />
+
       {/* Delete */}
       <form action={deleteAction} className="mt-4 border-t border-border pt-4">
         <input type="hidden" name="taskId" value={task.id} />
@@ -198,5 +215,69 @@ export function TaskEditForm({ task, members, workspaceId, boardId }: Props) {
         </button>
       </form>
     </div>
+  );
+}
+
+function TagPicker({
+  taskId,
+  workspaceId,
+  tags,
+  selectedTagIds,
+}: {
+  taskId: string;
+  workspaceId: string;
+  tags: { id: string; name: string; color: string | null }[];
+  selectedTagIds: string[];
+}) {
+  const [state, action, pending] = useActionState(setTaskTags, null);
+
+  if (tags.length === 0) return null;
+
+  return (
+    <form action={action} className="mt-4 border-t border-border pt-4">
+      <input type="hidden" name="taskId" value={taskId} />
+      <input type="hidden" name="workspaceId" value={workspaceId} />
+
+      <label className="block text-[11px] font-medium text-fg-muted">
+        Tags
+      </label>
+
+      {state?.success && (
+        <p className="mt-1 text-[11px] text-accent">Tags updated.</p>
+      )}
+      {state?.error && (
+        <p className="mt-1 text-[11px] text-accent-emphasis">{state.error}</p>
+      )}
+
+      <div className="mt-1.5 flex flex-wrap gap-1.5">
+        {tags.map((tag) => {
+          const color = tag.color ?? "#6B7280";
+          return (
+            <label
+              key={tag.id}
+              className="flex cursor-pointer items-center gap-1.5 rounded-full border px-2 py-0.5 text-xs transition-colors hover:opacity-80"
+              style={{ borderColor: color + "40", color }}
+            >
+              <input
+                type="checkbox"
+                name="tagIds"
+                value={tag.id}
+                defaultChecked={selectedTagIds.includes(tag.id)}
+                className="sr-only"
+              />
+              <span className="peer-checked:font-bold">{tag.name}</span>
+            </label>
+          );
+        })}
+      </div>
+
+      <button
+        type="submit"
+        disabled={pending}
+        className="mt-2 rounded bg-accent/10 px-2 py-1 text-[11px] font-medium text-accent hover:bg-accent/20 disabled:opacity-50"
+      >
+        {pending ? "Saving..." : "Update Tags"}
+      </button>
+    </form>
   );
 }

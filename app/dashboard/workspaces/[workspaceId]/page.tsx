@@ -18,6 +18,7 @@ import {
   PERMISSION_LABELS,
   PermissionKey,
 } from "@/lib/permissions";
+import { TagManager } from "@/components/tag-manager";
 
 export default async function WorkspaceOverviewPage({
   params,
@@ -226,24 +227,24 @@ export default async function WorkspaceOverviewPage({
             <Tag size={14} className="text-accent" />
             Tags
           </h2>
-          {workspace.tags.length === 0 ? (
-            <p className="mt-3 text-xs text-fg-muted">No tags defined yet.</p>
-          ) : (
-            <div className="mt-3 flex flex-wrap gap-2">
-              {workspace.tags.map((tag) => (
-                <span
-                  key={tag.id}
-                  className="rounded-full border px-2.5 py-0.5 text-[11px] font-medium"
-                  style={{
-                    borderColor: (tag.color ?? "#6B7280") + "40",
-                    color: tag.color ?? "#6B7280",
-                  }}
-                >
-                  {tag.name}
-                </span>
-              ))}
-            </div>
-          )}
+          <div className="mt-3">
+            <TagManager
+              tags={workspace.tags}
+              workspaceId={workspaceId}
+              canCreate={hasPermission(
+                membership.role.permissions,
+                Permission.CREATE_CONTENT,
+              )}
+              canEdit={hasPermission(
+                membership.role.permissions,
+                Permission.EDIT_CONTENT,
+              )}
+              canDelete={hasPermission(
+                membership.role.permissions,
+                Permission.DELETE_CONTENT,
+              )}
+            />
+          </div>
         </section>
 
         {/* Roles */}

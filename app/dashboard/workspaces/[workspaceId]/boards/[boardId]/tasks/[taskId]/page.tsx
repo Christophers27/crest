@@ -109,8 +109,14 @@ export default async function TaskDetailPage({
               dueDate: task.dueDate?.toISOString().split("T")[0] ?? "",
               points: task.points,
               assigneeIds: task.assignees.map((a) => a.id),
+              tagIds: task.tags.map((t) => t.id),
             }}
             members={members.map((m) => m.user)}
+            tags={await prisma.tag.findMany({
+              where: { workspaceId },
+              select: { id: true, name: true, color: true },
+              orderBy: { name: "asc" },
+            })}
             workspaceId={workspaceId}
             boardId={boardId}
           />
