@@ -9,11 +9,26 @@ import {
   CheckSquare,
   Inbox,
   ChevronDown,
+  ChevronRight,
   LogOut,
   Plus,
+  LayoutList,
+  Timer,
+  Users,
 } from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Logo } from "@/components/logo";
+
+interface Board {
+  id: string;
+  name: string;
+}
+
+interface Workspace {
+  id: string;
+  name: string;
+  boards: Board[];
+}
 
 interface SidebarProps {
   user: {
@@ -21,7 +36,7 @@ interface SidebarProps {
     email?: string | null;
     image?: string | null;
   };
-  workspaces: { id: string; name: string }[];
+  workspaces: Workspace[];
 }
 
 const userNavigation = [
@@ -30,20 +45,19 @@ const userNavigation = [
   { name: "Inbox", href: "/inbox", icon: Inbox },
 ];
 
-const workspaceNavigation = [
-  { name: "Overview", segment: "" },
-  { name: "Boards", segment: "/boards" },
-  { name: "Sprints", segment: "/sprints" },
-  { name: "Team", segment: "/team" },
-];
-
 export function Sidebar({ user, workspaces }: SidebarProps) {
   const pathname = usePathname();
   const [workspaceOpen, setWorkspaceOpen] = useState(false);
+  const [boardsExpanded, setBoardsExpanded] = useState(true);
 
   const workspaceMatch = pathname.match(/^\/dashboard\/workspaces\/([^/]+)/);
   const activeWorkspaceId = workspaceMatch?.[1] ?? workspaces[0]?.id;
   const activeWorkspace = workspaces.find((w) => w.id === activeWorkspaceId);
+
+  const boardsHref = activeWorkspaceId
+    ? `/dashboard/workspaces/${activeWorkspaceId}/boards`
+    : "#";
+  const boardsActive = pathname.includes("/boards");
 
   return (
     <aside className="flex w-56 flex-col border-r border-border bg-bg-elevated/60 backdrop-blur-sm">
@@ -70,7 +84,7 @@ export function Sidebar({ user, workspaces }: SidebarProps) {
               className={`flex items-center gap-2.5 rounded-md px-2.5 py-1.5 text-xs font-medium transition-colors ${
                 isActive
                   ? "bg-accent/10 text-accent"
-                  : "border-transparent text-fg-secondary hover:bg-bg-secondary hover:text-fg-primary"
+                  : "text-fg-secondary hover:bg-bg-secondary hover:text-fg-primary"
               }`}
             >
               <item.icon size={14} />
@@ -93,6 +107,8 @@ export function Sidebar({ user, workspaces }: SidebarProps) {
         <p className="mb-1.5 px-2.5 text-[10px] font-medium uppercase tracking-widest text-accent-subtle">
           Workspace
         </p>
+
+        {/* Workspace switcher */}
         <div className="relative mb-2">
           <button
             onClick={() => setWorkspaceOpen(!workspaceOpen)}
@@ -144,28 +160,85 @@ export function Sidebar({ user, workspaces }: SidebarProps) {
           )}
         </div>
 
+        {/* Workspace nav */}
         {activeWorkspace && (
           <nav className="space-y-0.5">
-            {workspaceNavigation.map((item) => {
-              const href = `/dashboard/workspaces/${activeWorkspaceId}${item.segment}`;
-              const isActive =
-                item.segment === ""
-                  ? pathname === href
-                  : pathname.startsWith(href);
-              return (
+            {/* Overview */}
+            <SidebarLink
+              href={`/dashboard/workspaces/${activeWorkspaceId}`}
+              icon={LayoutGrid}
+              label="Overview"
+              active={pathname === `/dashboard/workspaces/${activeWorkspaceId}`}
+            />
+
+            {/* Boards — expandable */}
+            <div>
+              <div className="flex items-center">
+                <button
+                  onClick={() => setBoardsExpanded(!boardsExpanded)}
+                  className="shrink-0 rounded p-0.5 text-fg-muted hover:text-fg-secondary"
+                >
+                  {boardsExpanded ? (
+                    <ChevronDown size={10} />
+                  ) : (
+                    <ChevronRight size={10} />
+                  )}
+                </button>
                 <Link
-                  key={item.name}
-                  href={href}
-                  className={`block rounded-md px-2.5 py-1.5 text-xs font-medium transition-colors ${
-                    isActive
+                  href={boardsHref}
+                  className={`flex flex-1 items-center gap-2 rounded-md px-2 py-1.5 text-xs font-medium transition-colors ${
+                    boardsActive
                       ? "bg-accent/10 text-accent"
                       : "text-fg-secondary hover:bg-bg-secondary hover:text-fg-primary"
                   }`}
                 >
-                  {item.name}
+                  <LayoutList size={13} />
+                  Boards
                 </Link>
-              );
-            })}
+              </div>
+
+              {boardsExpanded && activeWorkspace.boards.length > 0 && (
+                <div className="ml-4 mt-0.5 space-y-0.5 border-l border-border-subtle pl-2">
+                  {activeWorkspace.boards.map((board) => {
+                    const boardHref = `/dashboard/workspaces/${activeWorkspaceId}/boards/${board.id}`;
+                    const isBoardActive = pathname.startsWith(boardHref);
+                    return (
+                      <Link
+                        key={board.id}
+                        href={boardHref}
+                        className={`block truncate rounded-md px-2 py-1 text-[11px] transition-colors ${
+                          isBoardActive
+                            ? "text-accent"
+                            : "text-fg-muted hover:text-fg-secondary"
+                        }`}
+                      >
+                        {board.name}
+                      </Link>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+
+            {/* Sprints */}
+            <SidebarLink
+              href={`/dashboard/workspaces/${activeWorkspaceId}/sprints`}
+              icon={Timer}
+              label="Sprints"
+              active={pathname.startsWith(
+                `/dashboard/workspaces/${activeWorkspaceId}/sprints`,
+              )}
+            />
+
+            {/* Team */}
+            <SidebarLink
+              href={`/dashboard/workspaces/${activeWorkspaceId}/team`}
+              icon={Users}
+              label="Team"
+              active={pathname.startsWith(
+                `/dashboard/workspaces/${activeWorkspaceId}/team`,
+              )}
+            />
           </nav>
         )}
       </div>
@@ -192,5 +265,31 @@ export function Sidebar({ user, workspaces }: SidebarProps) {
         </div>
       </div>
     </aside>
+  );
+}
+
+function SidebarLink({
+  href,
+  icon: Icon,
+  label,
+  active,
+}: {
+  href: string;
+  icon: React.ComponentType<{ size: number }>;
+  label: string;
+  active: boolean;
+}) {
+  return (
+    <Link
+      href={href}
+      className={`flex items-center gap-2.5 rounded-md px-2.5 py-1.5 text-xs font-medium transition-colors ${
+        active
+          ? "bg-accent/10 text-accent"
+          : "text-fg-secondary hover:bg-bg-secondary hover:text-fg-primary"
+      }`}
+    >
+      <Icon size={13} />
+      {label}
+    </Link>
   );
 }
