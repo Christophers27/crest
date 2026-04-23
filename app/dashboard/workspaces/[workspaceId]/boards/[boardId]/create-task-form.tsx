@@ -8,9 +8,13 @@ import { Plus, X } from "lucide-react";
 export function CreateTaskForm({
   boardId,
   workspaceId,
+  defaultStatus = "NOT_STARTED",
+  compact = false,
 }: {
   boardId: string;
   workspaceId: string;
+  defaultStatus?: string;
+  compact?: boolean;
 }) {
   const [open, setOpen] = useState(false);
   const [state, action, pending] = useActionState(
@@ -26,10 +30,12 @@ export function CreateTaskForm({
     return (
       <button
         onClick={() => setOpen(true)}
-        className="flex items-center gap-1.5 rounded-md border border-dashed border-border px-3 py-2 text-xs text-fg-muted transition-colors hover:border-accent/40 hover:text-accent"
+        className={`flex items-center gap-1 rounded-md border border-dashed border-border text-fg-muted transition-colors hover:border-accent/40 hover:text-accent ${
+          compact ? "px-1.5 py-1 text-[10px]" : "px-3 py-2 text-xs"
+        }`}
       >
-        <Plus size={12} />
-        Add Task
+        <Plus size={compact ? 10 : 12} />
+        {compact ? "Add" : "Add Task"}
       </button>
     );
   }
@@ -37,61 +43,62 @@ export function CreateTaskForm({
   return (
     <form
       action={action}
-      className="rounded-md border border-border bg-bg-elevated/60 p-4 backdrop-blur-sm"
+      className="rounded-md border border-border bg-bg-elevated/80 p-3 backdrop-blur-sm"
     >
       <input type="hidden" name="boardId" value={boardId} />
       <input type="hidden" name="workspaceId" value={workspaceId} />
+      <input type="hidden" name="status" value={defaultStatus} />
 
-      <div className="flex items-center justify-between mb-3">
-        <p className="text-xs font-medium text-fg-secondary">New Task</p>
+      <div className="mb-2 flex items-center justify-between">
+        <p className="text-[10px] font-medium text-fg-secondary">New Task</p>
         <button
           type="button"
           onClick={() => setOpen(false)}
           className="text-fg-muted hover:text-fg-secondary"
         >
-          <X size={14} />
+          <X size={12} />
         </button>
       </div>
 
       {state?.error && (
-        <div className="mb-3 rounded-md border border-accent-emphasis/30 bg-accent-emphasis/10 px-3 py-2 text-xs text-accent-emphasis">
+        <div className="mb-2 rounded border border-accent-emphasis/30 bg-accent-emphasis/10 px-2 py-1 text-[10px] text-accent-emphasis">
           {state.error}
         </div>
       )}
 
-      <div className="space-y-3">
-        <input
-          name="title"
-          type="text"
-          required
-          className="block w-full rounded-md border border-border bg-bg-primary px-3 py-2 font-mono text-sm text-fg-primary placeholder-fg-muted transition-colors focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent/50"
-          placeholder="Task title"
-          autoFocus
-        />
+      <input
+        name="title"
+        type="text"
+        required
+        className="mb-2 block w-full rounded border border-border bg-bg-primary px-2 py-1.5 font-mono text-xs text-fg-primary placeholder-fg-muted focus:border-accent focus:outline-none"
+        placeholder="Task title"
+        autoFocus
+      />
 
+      {!compact && (
         <textarea
           name="description"
           rows={2}
-          className="block w-full resize-none rounded-md border border-border bg-bg-primary px-3 py-2 font-mono text-sm text-fg-primary placeholder-fg-muted transition-colors focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent/50"
+          className="mb-2 block w-full resize-none rounded border border-border bg-bg-primary px-2 py-1.5 font-mono text-xs text-fg-primary placeholder-fg-muted focus:border-accent focus:outline-none"
           placeholder="Description (optional)"
         />
+      )}
 
-        <div className="flex justify-end gap-2">
-          <button
-            type="button"
-            onClick={() => setOpen(false)}
-            className="rounded-md px-3 py-1.5 text-xs text-fg-muted transition-colors hover:text-fg-secondary"
-          >
-            Cancel
-          </button>
-          <button
-            type="submit"
-            disabled={pending}
-            className="rounded-md bg-accent px-3 py-1.5 text-xs font-medium text-bg-primary transition-all hover:bg-accent-emphasis disabled:opacity-50"
-          >
-            {pending ? "Creating..." : "Create Task"}
-          </button>
-        </div>
+      <div className="flex justify-end gap-1.5">
+        <button
+          type="button"
+          onClick={() => setOpen(false)}
+          className="rounded px-2 py-1 text-[10px] text-fg-muted hover:text-fg-secondary"
+        >
+          Cancel
+        </button>
+        <button
+          type="submit"
+          disabled={pending}
+          className="rounded bg-accent px-2 py-1 text-[10px] font-medium text-bg-primary hover:bg-accent-emphasis disabled:opacity-50"
+        >
+          {pending ? "..." : "Create"}
+        </button>
       </div>
     </form>
   );

@@ -6,6 +6,7 @@ import { Archive, ArchiveRestore, Trash2, Settings } from "lucide-react";
 import { archiveBoard, deleteBoard } from "@/lib/actions/board";
 import { hasPermission, Permission } from "@/lib/permissions";
 import { TaskStatus } from "@/prisma/generated/prisma/enums";
+import { CreateTaskForm } from "./[boardId]/create-task-form";
 
 interface Task {
   id: string;
@@ -65,6 +66,7 @@ export function BoardRow({
 
   const canEdit = hasPermission(permissions, Permission.EDIT_CONTENT);
   const canDelete = hasPermission(permissions, Permission.DELETE_CONTENT);
+  const canCreate = hasPermission(permissions, Permission.CREATE_CONTENT);
 
   const tasksByStatus = statusOrder.map((status) => ({
     status,
@@ -218,6 +220,18 @@ export function BoardRow({
                 <p className="py-3 text-center text-[9px] text-fg-muted">—</p>
               )}
             </div>
+
+            {/* Add task to this column */}
+            {canCreate && board.isActive && (
+              <div className="mt-1.5">
+                <CreateTaskForm
+                  boardId={board.id}
+                  workspaceId={workspaceId}
+                  defaultStatus={column.status}
+                  compact
+                />
+              </div>
+            )}
           </div>
         ))}
       </div>

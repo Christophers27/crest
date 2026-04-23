@@ -125,28 +125,31 @@ export default async function BoardDetailPage({
         />
       </div>
 
-      {/* Inline task creation */}
-      {canCreate && (
-        <div className="mt-6">
-          <CreateTaskForm boardId={boardId} workspaceId={workspaceId} />
-        </div>
-      )}
-
       {/* Kanban columns */}
       <div className="mt-6 grid gap-4 lg:grid-cols-4">
         {tasksByStatus.map((column) => (
           <div key={column.status}>
-            <div className="mb-3 flex items-center gap-2">
-              <div
-                className="h-2 w-2 rounded-full"
-                style={{ backgroundColor: column.color }}
-              />
-              <h3 className="text-xs font-medium text-fg-secondary">
-                {column.label}
-              </h3>
-              <span className="text-[10px] text-fg-muted">
-                {column.tasks.length}
-              </span>
+            <div className="mb-3 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div
+                  className="h-2 w-2 rounded-full"
+                  style={{ backgroundColor: column.color }}
+                />
+                <h3 className="text-xs font-medium text-fg-secondary">
+                  {column.label}
+                </h3>
+                <span className="text-[10px] text-fg-muted">
+                  {column.tasks.length}
+                </span>
+              </div>
+              {canCreate && (
+                <CreateTaskForm
+                  boardId={boardId}
+                  workspaceId={workspaceId}
+                  defaultStatus={column.status}
+                  compact
+                />
+              )}
             </div>
 
             <div className="max-h-[60vh] space-y-2 overflow-y-auto pr-1">

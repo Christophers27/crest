@@ -17,7 +17,17 @@ export default async function DashboardLayout({
   const memberships = await prisma.workspaceMember.findMany({
     where: { userId: session.user.id! },
     include: {
-      workspace: { select: { id: true, name: true } },
+      workspace: {
+        select: {
+          id: true,
+          name: true,
+          boards: {
+            where: { isActive: true },
+            select: { id: true, name: true },
+            orderBy: { displayOrder: "asc" },
+          },
+        },
+      },
     },
     orderBy: { joinedAt: "desc" },
   });
