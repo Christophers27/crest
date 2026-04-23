@@ -17,9 +17,11 @@ interface Task {
   description: string | null;
   status: string;
   priority: string;
+  boardId?: string;
   author: { name: string | null };
   assignees: { id: string; name: string | null }[];
   tags: { name: string; color: string | null }[];
+  board?: { id: string; name: string };
 }
 
 interface Column {
@@ -136,7 +138,7 @@ export function KanbanBoard({
                               />
                             )}
                             <Link
-                              href={`/dashboard/workspaces/${workspaceId}/boards/${boardId}/tasks/${task.id}`}
+                              href={`/dashboard/workspaces/${workspaceId}/boards/${task.board?.id ?? boardId}/tasks/${task.id}`}
                               className="font-mono text-xs font-medium text-fg-primary hover:text-accent"
                               onClick={(e) => e.stopPropagation()}
                             >

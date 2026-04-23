@@ -67,6 +67,10 @@ export async function createTask(_prev: unknown, formData: FormData) {
     return { error: "Task title is required" };
   }
 
+  if (!dueDate) {
+    return { error: "Due date is required" };
+  }
+
   if (!VALID_STATUSES.includes(status)) return { error: "Invalid status" };
   if (!VALID_PRIORITIES.includes(priority)) return { error: "Invalid priority" };
 

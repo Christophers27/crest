@@ -84,6 +84,15 @@ export function CreateTaskForm({
         />
       )}
 
+      <div className="mb-2">
+        <input
+          name="dueDate"
+          type="date"
+          required
+          className="block w-full rounded border border-border bg-bg-primary px-2 py-1.5 font-mono text-xs text-fg-primary focus:border-accent focus:outline-none"
+        />
+      </div>
+
       <div className="flex justify-end gap-1.5">
         <button
           type="button"
