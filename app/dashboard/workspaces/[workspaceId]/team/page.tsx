@@ -9,6 +9,7 @@ import { InviteSection } from "./invite-section";
 import { ApplicationList } from "./application-list";
 import { LeaveWorkspaceButton } from "./leave-button";
 import { MemberRoleSelect } from "./member-role-select";
+import { UserAvatar } from "@/components/user-avatar";
 
 export default async function WorkspaceTeamPage({
   params,
@@ -44,7 +45,7 @@ export default async function WorkspaceTeamPage({
       prisma.workspaceMember.findMany({
         where: { workspaceId },
         include: {
-          user: { select: { id: true, name: true, email: true } },
+          user: { select: { id: true, name: true, email: true, image: true } },
           role: { select: { id: true, name: true, color: true } },
         },
         orderBy: { joinedAt: "asc" },
@@ -113,9 +114,11 @@ export default async function WorkspaceTeamPage({
               className="flex items-center justify-between rounded-md border border-border bg-bg-elevated/60 px-4 py-3 backdrop-blur-sm"
             >
               <div className="flex items-center gap-3">
-                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-accent/10 font-mono text-xs font-bold text-accent">
-                  {member.user.name?.charAt(0)?.toUpperCase() ?? "?"}
-                </div>
+                <UserAvatar
+                  name={member.user.name}
+                  image={member.user.image}
+                  size={32}
+                />
                 <div>
                   <p className="text-xs font-medium text-fg-primary">
                     {member.user.name}

@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Logo } from "@/components/logo";
+import { UserAvatar } from "@/components/user-avatar";
 
 interface Board {
   id: string;
@@ -305,15 +306,18 @@ export function Sidebar({ user, workspaces }: SidebarProps) {
       {/* User footer */}
       <div className="border-t border-border p-3">
         <div className="flex items-center gap-2.5">
-          <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-accent-emphasis/15 font-mono text-xs font-bold text-accent-emphasis">
-            {user.name?.charAt(0)?.toUpperCase() ?? "?"}
-          </div>
-          <div className="min-w-0 flex-1">
-            <p className="truncate text-xs font-medium text-fg-primary">
+          <Link
+            href="/dashboard/profile"
+            className="shrink-0 transition-opacity hover:opacity-80"
+          >
+            <UserAvatar name={user.name} image={user.image} size={28} />
+          </Link>
+          <Link href="/dashboard/profile" className="min-w-0 flex-1 group">
+            <p className="truncate text-xs font-medium text-fg-primary group-hover:text-accent">
               {user.name}
             </p>
             <p className="truncate text-[11px] text-fg-muted">{user.email}</p>
-          </div>
+          </Link>
           <button
             onClick={() => signOut({ callbackUrl: "/sign-in" })}
             className="shrink-0 rounded-md p-1 text-fg-muted transition-colors hover:bg-bg-secondary hover:text-accent-emphasis"
