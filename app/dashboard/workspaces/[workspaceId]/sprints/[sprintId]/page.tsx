@@ -54,7 +54,7 @@ export default async function SprintDetailPage({
         orderBy: { createdAt: "desc" },
         include: {
           author: { select: { name: true } },
-          assignees: { select: { id: true, name: true } },
+          assignees: { select: { id: true, name: true, image: true } },
           tags: { select: { name: true, color: true } },
           board: { select: { id: true, name: true } },
         },

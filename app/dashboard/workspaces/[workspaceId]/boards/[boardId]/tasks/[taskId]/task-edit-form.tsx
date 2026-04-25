@@ -3,8 +3,9 @@
 import { useActionState, useState } from "react";
 import { updateTask, deleteTask } from "@/lib/actions/task";
 import { setTaskTags } from "@/lib/actions/tag";
-import { Trash2 } from "lucide-react";
+import { Trash2, X, Plus, Search } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { UserAvatar } from "@/components/user-avatar";
 
 interface Props {
   task: {
@@ -33,6 +34,7 @@ export function TaskEditForm({
   boardId,
 }: Props) {
   const router = useRouter();
+  const [assigneeIds, setAssigneeIds] = useState<string[]>(task.assigneeIds);
   const [state, action, pending] = useActionState(updateTask, null);
   const [, deleteAction, deletePending] = useActionState(
     async (prev: unknown, formData: FormData) => {
@@ -154,29 +156,17 @@ export function TaskEditForm({
           />
         </div>
 
-        {/* Assignees */}
-        <div>
-          <label className="block text-[11px] font-medium text-fg-muted">
-            Assignees
-          </label>
-          <div className="mt-1 space-y-1">
-            {members.map((m) => (
-              <label
-                key={m.id}
-                className="flex items-center gap-2 rounded-md px-2 py-1 text-xs text-fg-primary hover:bg-bg-secondary"
-              >
-                <input
-                  type="checkbox"
-                  name="assigneeIds"
-                  value={m.id}
-                  defaultChecked={task.assigneeIds.includes(m.id)}
-                  className="rounded border-border text-accent focus:ring-accent/50"
-                />
-                {m.name ?? m.email}
-              </label>
-            ))}
-          </div>
-        </div>
+        {/* Assignees — managed by AssigneePicker below */}
+        {assigneeIds.map((id) => (
+          <input key={id} type="hidden" name="assigneeIds" value={id} />
+        ))}
+
+        {/* Assignee picker (visual, outside form submission) */}
+        <AssigneePicker
+          members={members}
+          assigneeIds={assigneeIds}
+          onChange={setAssigneeIds}
+        />
 
         <div className="flex items-center justify-between pt-2">
           <button
@@ -214,6 +204,122 @@ export function TaskEditForm({
           {deletePending ? "Deleting..." : "Delete task"}
         </button>
       </form>
+    </div>
+  );
+}
+
+function AssigneePicker({
+  members,
+  assigneeIds,
+  onChange,
+}: {
+  members: { id: string; name: string | null; email: string | null }[];
+  assigneeIds: string[];
+  onChange: (ids: string[]) => void;
+}) {
+  const [showDropdown, setShowDropdown] = useState(false);
+  const [search, setSearch] = useState("");
+
+  const assigned = members.filter((m) => assigneeIds.includes(m.id));
+  const available = members.filter(
+    (m) =>
+      !assigneeIds.includes(m.id) &&
+      (m.name?.toLowerCase().includes(search.toLowerCase()) ||
+        m.email?.toLowerCase().includes(search.toLowerCase())),
+  );
+
+  function add(id: string) {
+    onChange([...assigneeIds, id]);
+    setSearch("");
+  }
+
+  function remove(id: string) {
+    onChange(assigneeIds.filter((a) => a !== id));
+  }
+
+  return (
+    <div>
+      <label className="block text-[11px] font-medium text-fg-muted">
+        Assignees
+      </label>
+
+      {/* Currently assigned */}
+      <div className="mt-1.5 flex flex-wrap gap-1.5">
+        {assigned.map((m) => (
+          <span
+            key={m.id}
+            className="flex items-center gap-1.5 rounded-full border border-border bg-bg-secondary px-2 py-0.5 text-xs text-fg-primary"
+          >
+            <UserAvatar name={m.name} image={null} size={16} />
+            {m.name ?? m.email}
+            <button
+              type="button"
+              onClick={() => remove(m.id)}
+              className="text-fg-muted hover:text-accent-emphasis"
+            >
+              <X size={10} />
+            </button>
+          </span>
+        ))}
+
+        {/* Add button / search */}
+        {!showDropdown ? (
+          <button
+            type="button"
+            onClick={() => setShowDropdown(true)}
+            className="flex items-center gap-1 rounded-full border border-dashed border-border px-2 py-0.5 text-xs text-fg-muted hover:border-accent/40 hover:text-accent"
+          >
+            <Plus size={10} />
+            Add
+          </button>
+        ) : (
+          <div className="relative w-full mt-1">
+            <div className="flex items-center gap-1.5 rounded-md border border-border bg-bg-primary px-2 py-1">
+              <Search size={12} className="text-fg-muted" />
+              <input
+                type="text"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Search members..."
+                className="flex-1 bg-transparent font-mono text-xs text-fg-primary placeholder-fg-muted outline-none"
+                autoFocus
+              />
+              <button
+                type="button"
+                onClick={() => {
+                  setShowDropdown(false);
+                  setSearch("");
+                }}
+                className="text-fg-muted hover:text-fg-secondary"
+              >
+                <X size={12} />
+              </button>
+            </div>
+
+            {available.length > 0 && (
+              <div className="absolute left-0 top-full z-10 mt-1 max-h-40 w-full overflow-y-auto rounded-md border border-border bg-bg-elevated shadow-lg">
+                {available.map((m) => (
+                  <button
+                    key={m.id}
+                    type="button"
+                    onClick={() => add(m.id)}
+                    className="flex w-full items-center gap-2 px-3 py-1.5 text-xs text-fg-primary hover:bg-bg-secondary"
+                  >
+                    <UserAvatar name={m.name} image={null} size={18} />
+                    <span>{m.name ?? m.email}</span>
+                  </button>
+                ))}
+              </div>
+            )}
+
+            {available.length === 0 && search && (
+              <div className="absolute left-0 top-full z-10 mt-1 w-full rounded-md border border-border bg-bg-elevated px-3 py-2 text-xs text-fg-muted shadow-lg">
+                No matching members
+              </div>
+            )}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

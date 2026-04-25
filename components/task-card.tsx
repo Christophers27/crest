@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { UserAvatar } from "@/components/user-avatar";
 
 const PRIORITY_COLORS: Record<string, string> = {
   URGENT: "#ef4444",
@@ -8,20 +9,6 @@ const PRIORITY_COLORS: Record<string, string> = {
   MEDIUM: "#f1c258",
   LOW: "#6bc96b",
   NONE: "",
-};
-
-const STATUS_COLORS: Record<string, string> = {
-  NOT_STARTED: "#9c9c98",
-  IN_PROGRESS: "#f1c258",
-  IN_REVIEW: "#f0a468",
-  COMPLETED: "#6bc96b",
-};
-
-const STATUS_LABELS: Record<string, string> = {
-  NOT_STARTED: "Not Started",
-  IN_PROGRESS: "In Progress",
-  IN_REVIEW: "In Review",
-  COMPLETED: "Completed",
 };
 
 export interface TaskCardData {
@@ -32,15 +19,15 @@ export interface TaskCardData {
   priority: string;
   dueDate?: Date | null;
   points?: number | null;
-  assignees: { id: string; name: string | null }[];
+  assignees: { id: string; name: string | null; image?: string | null }[];
   tags?: { name: string; color: string | null }[];
   board?: { id: string; name: string };
   boardId?: string;
 }
 
 /**
- * Simple card: name, priority dot, description (1 line), assignees, due date.
- * Detailed card: above + tags, status badge, points.
+ * Simple: priority, title, description (1 line), tags, assignee avatars, due date.
+ * Detailed: above + points.
  */
 export function TaskCard({
   task,
@@ -84,19 +71,11 @@ export function TaskCard({
         </p>
       )}
 
-      {/* Row 3 (detailed only): tags + status + points */}
-      {variant === "detailed" && (
+      {/* Row 3: tags (always shown) + points (detailed only) */}
+      {((task.tags && task.tags.length > 0) ||
+        (variant === "detailed" && task.points != null)) && (
         <div className="mt-1.5 flex items-center gap-1.5 flex-wrap">
-          <span
-            className="rounded-full px-1.5 py-px text-[10px] font-medium"
-            style={{
-              backgroundColor: STATUS_COLORS[task.status] + "20",
-              color: STATUS_COLORS[task.status],
-            }}
-          >
-            {STATUS_LABELS[task.status] ?? task.status}
-          </span>
-          {task.points != null && (
+          {variant === "detailed" && task.points != null && (
             <span className="rounded bg-bg-secondary px-1 py-px text-[10px] font-mono text-fg-muted">
               {task.points}pt
             </span>
@@ -116,15 +95,30 @@ export function TaskCard({
         </div>
       )}
 
-      {/* Row 4: assignees + due date */}
-      <div className="mt-1.5 flex items-center gap-2 text-[11px] text-fg-muted">
-        {task.assignees.length > 0 && (
-          <span className="truncate">
-            {task.assignees.map((a) => a.name).join(", ")}
-          </span>
+      {/* Row 4: assignee avatars + due date */}
+      <div className="mt-1.5 flex items-center justify-between">
+        {task.assignees.length > 0 ? (
+          <div className="flex -space-x-1">
+            {task.assignees.slice(0, 4).map((a) => (
+              <UserAvatar
+                key={a.id}
+                name={a.name}
+                image={a.image}
+                size={20}
+                className="ring-1 ring-bg-elevated"
+              />
+            ))}
+            {task.assignees.length > 4 && (
+              <div className="flex h-5 w-5 items-center justify-center rounded-full bg-bg-secondary text-[8px] font-medium text-fg-muted ring-1 ring-bg-elevated">
+                +{task.assignees.length - 4}
+              </div>
+            )}
+          </div>
+        ) : (
+          <div />
         )}
         {task.dueDate && (
-          <span className="ml-auto shrink-0">
+          <span className="text-[11px] text-fg-muted">
             {new Date(task.dueDate).toLocaleDateString()}
           </span>
         )}

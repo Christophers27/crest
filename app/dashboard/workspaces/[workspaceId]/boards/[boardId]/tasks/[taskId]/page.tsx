@@ -2,7 +2,7 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, Calendar, User, Clock } from "lucide-react";
+import { Calendar, User, Clock } from "lucide-react";
 import { TaskEditForm } from "./task-edit-form";
 import { CommentSection } from "./comment-section";
 import { AttachmentSection } from "@/components/attachment-section";
@@ -58,7 +58,7 @@ export default async function TaskDetailPage({
     include: {
       board: { select: { name: true, workspaceId: true } },
       author: { select: { id: true, name: true, email: true } },
-      assignees: { select: { id: true, name: true, email: true } },
+      assignees: { select: { id: true, name: true, email: true, image: true } },
       tags: { select: { id: true, name: true, color: true } },
       sprints: { select: { id: true, title: true } },
       subtasks: {
@@ -92,14 +92,6 @@ export default async function TaskDetailPage({
 
   return (
     <div className="mx-auto max-w-3xl">
-      <Link
-        href={`/dashboard/workspaces/${workspaceId}/boards/${boardId}`}
-        className="mb-6 inline-flex items-center gap-1.5 text-xs text-fg-muted transition-colors hover:text-fg-secondary"
-      >
-        <ArrowLeft size={12} />
-        Back to {task.board.name}
-      </Link>
-
       <div className="grid gap-6 lg:grid-cols-[1fr_240px]">
         {/* Main content */}
         <div>
