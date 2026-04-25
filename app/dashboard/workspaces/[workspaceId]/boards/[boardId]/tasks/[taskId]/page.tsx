@@ -5,6 +5,7 @@ import Link from "next/link";
 import { ArrowLeft, Calendar, User, Clock } from "lucide-react";
 import { TaskEditForm } from "./task-edit-form";
 import { CommentSection } from "./comment-section";
+import { AttachmentSection } from "@/components/attachment-section";
 
 const STATUS_LABELS: Record<string, string> = {
   NOT_STARTED: "Not Started",
@@ -67,6 +68,10 @@ export default async function TaskDetailPage({
       comments: {
         include: { user: { select: { id: true, name: true } } },
         orderBy: { createdAt: "asc" },
+      },
+      attachments: {
+        include: { uploadedBy: { select: { name: true } } },
+        orderBy: { createdAt: "desc" },
       },
     },
   });
@@ -149,6 +154,11 @@ export default async function TaskDetailPage({
               </div>
             </div>
           )}
+
+          {/* Attachments */}
+          <div className="mt-8">
+            <AttachmentSection taskId={taskId} attachments={task.attachments} />
+          </div>
 
           {/* Comments */}
           <div className="mt-8">
